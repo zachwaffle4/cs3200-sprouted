@@ -2,7 +2,9 @@
 secrets.toml
 __pycache__
 secrets/
+*/.env
 .env
 .env.local
 */logs/*
 .vscode/
+.idea/
