@@ -15,96 +15,67 @@ fake = Faker()
 Faker.seed(42)
 random.seed(42)
 
-def dataLoader () -> None: 
-    #Retrives the password from the env file
-    load_dotenv(os.path.join(os.path.dirname(__file__), '../api/.env'))
+load_dotenv(os.path.join(os.path.dirname(__file__), '../api/.env'))
 
-    global roles 
-    global orgTypes
-    global wateringFreq
-    global wateringTime
-    global wateringMethod
-    global severities
-    global urgencies
-    global taskStatus
-    global cropData
-    global numSites
-    global numCrops
-    global numUser
-    global numOrgs
-    global numPlots
-    global plot_names
-    global numWorkDays
-    global numSchedules
-    global numHarvests
-    global numPestReports
-    global numAssignments
-    global pair
-    global numListings
-    global numRequests
-    global numTasks
-    global task_descriptions
-    global numSignUps
-    global numLogs
+roles = ["volunteer", "admin", "coordinator", "gardener"]
+orgTypes = ["Food Bank", "Shelter", "School", "Restaurant", "Community Center"]
+wateringFreq = ["daily", "every other day", "twice a week", "weekly"]
+wateringTime = ["morning", "evening", "afternoon"]
+wateringMethod = ["drip", "sprinkler", "hand watering", "soaker hose"]
+severities = ["low", "medium", "high", "critical"]
+urgencies = ["low", "medium", "high"]
+taskStatus = ["pending", "in progress", "completed"]
 
-    roles = ["volunteer", "admin", "coordinator", "gardener"]
-    orgTypes = ["Food Bank", "Shelter", "School", "Restaurant", "Community Center"]
-    wateringFreq = ["daily", "every other day", "twice a week", "weekly"]
-    wateringTime = ["morning", "evening", "afternoon"]
-    wateringMethod = ["drip", "sprinkler", "hand watering", "soaker hose"]
-    severities = ["low", "medium", "high", "critical"]
-    urgencies = ["low", "medium", "high"]
-    taskStatus = ["pending", "in progress", "completed"]
+cropData = [
+("Tomato", "Vegetable"), ("Basil", "Herb"), ("Lettuce", "Vegetable"),
+("Carrot", "Vegetable"), ("Pepper", "Vegetable"), ("Kale", "Vegetable"),
+("Cilantro", "Herb"), ("Squash", "Vegetable"), ("Cucumber", "Vegetable"),
+("Strawberry", "Fruit"), ("Mint", "Herb"), ("Zucchini", "Vegetable"),
+("Spinach", "Vegetable"), ("Radish", "Vegetable"), ("Green Bean", "Vegetable"),
+("Rosemary", "Herb"), ("Blueberry", "Fruit"), ("Corn", "Vegetable"),
+("Pumpkin", "Vegetable"), ("Thyme", "Herb")
+]
 
-    cropData = [
-    ("Tomato", "Vegetable"), ("Basil", "Herb"), ("Lettuce", "Vegetable"),
-    ("Carrot", "Vegetable"), ("Pepper", "Vegetable"), ("Kale", "Vegetable"),
-    ("Cilantro", "Herb"), ("Squash", "Vegetable"), ("Cucumber", "Vegetable"),
-    ("Strawberry", "Fruit"), ("Mint", "Herb"), ("Zucchini", "Vegetable"),
-    ("Spinach", "Vegetable"), ("Radish", "Vegetable"), ("Green Bean", "Vegetable"),
-    ("Rosemary", "Herb"), ("Blueberry", "Fruit"), ("Corn", "Vegetable"),
-    ("Pumpkin", "Vegetable"), ("Thyme", "Herb")
-    ]
+numSites = 100
+numCrops = len(cropData)
+numUser = 100
+numOrgs = 100
+numPlots = 100
 
-    numSites = 100
-    numCrops = len(cropData)
-    numUser = 100
-    numOrgs = 100
-    numPlots = 100
+plot_names = ["Bed A", "Bed B", "Bed C", "Bed D", "North Plot", "South Plot",
+            "Herb Spiral", "Raised Bed 1", "Raised Bed 2", "Greenhouse Row"]
 
-    plot_names = ["Bed A", "Bed B", "Bed C", "Bed D", "North Plot", "South Plot",
-              "Herb Spiral", "Raised Bed 1", "Raised Bed 2", "Greenhouse Row"]
+numWorkDays = 100
+numSchedules = 100
+numHarvests = 100
+numPestReports = 100
+numAssignments = 100
+numYieldPairs = 30
+numListings = 100
+numRequests = 100
+numPickups = 100
 
-    numWorkDays = 100
-    numSchedules = 100
-    numHarvests = 100
-    numPestReports = 100
-    numAssignments = 100
-    pair = 30
-    numListings = 100
-    numRequests = 100
+numTasks = 100
+task_descriptions = [
+    "Weed the raised beds", "Spread mulch along pathways",
+    "Set up irrigation lines", "Plant seedlings in Bed A",
+    "Harvest ripe tomatoes", "Repair fence on north side",
+    "Turn compost bins", "Clear debris after storm",
+    "Install new row covers", "Label all crop rows",
+]
 
-    numTasks = 100
-    task_descriptions = [
-        "Weed the raised beds", "Spread mulch along pathways",
-        "Set up irrigation lines", "Plant seedlings in Bed A",
-        "Harvest ripe tomatoes", "Repair fence on north side",
-        "Turn compost bins", "Clear debris after storm",
-        "Install new row covers", "Label all crop rows",
-    ]
-
-    numSignUps = 100
-    numLogs = 100
+numSignUps = 100
+numLogs = 100
 
 def mysqlConnector () -> None: 
     global MySQL
     global db 
     db = mysql.connector.connect(
         host = "localhost",
-        port = 3200,
-        user = "root",
+        port = os.environ.get("DB_PORT", "3200"),
+        user = os.environ.get("DB_USER", "root"),
         password = os.environ.get("MYSQL_ROOT_PASSWORD", ""),
-        database = "sprouted",
+        database = os.environ.get("DB_NAME", "Sprouted"),
     )
     MySQL = db.cursor()
 
@@ -122,7 +93,7 @@ def seedSites (numSites: int) -> None:
         )
     db.commit()
 
-def seedCropData (cropData : List[str]) -> None:  
+def seedCropData (cropData : List[tuple]) -> None:
     for name, ctype in cropData:
         MySQL.execute(
             "INSERT INTO Crop (crop_name, crop_type) VALUES (%s,%s)",
@@ -161,7 +132,7 @@ def seedOrgs (numOrgs: int) -> None :
         )
     db.commit()
 
-def seedPlots (numPlots : List[str]) -> None:
+def seedPlots (numPlots : int) -> None:
     for _ in range(numPlots):
         MySQL.execute(
             "INSERT INTO Plot (name, site_id) VALUES (%s,%s)",
@@ -241,7 +212,7 @@ def seedPestReports (numPestReports : int) -> None:
         )
     db.commit()
 
-def seedAssigments (numAssignments : int) -> None:
+def seedAssignments (numAssignments : int) -> None:
     for _ in range(numAssignments):
         assigned = fake.date_between(start_date="-120d", end_date="today")
         end = assigned + timedelta(days=random.randint(30, 180)) if random.random() > 0.3 else None
@@ -257,11 +228,10 @@ def seedAssigments (numAssignments : int) -> None:
         )
     db.commit()
 
-def seedYieldPairs (pairs : int) -> None:
+def seedYieldPairs(pairs: int) -> None:
     yield_pairs = set()
     while len(yield_pairs) < pairs:
-        pair = (random.randint(1, numPlots), random.randint(1, numCrops))
-        yield_pairs.add(pair)
+        yield_pairs.add((random.randint(1, numPlots), random.randint(1, numCrops)))
 
     for plot_id, crop_id in yield_pairs:
         MySQL.execute(
@@ -288,7 +258,7 @@ def seedListing (numListings : int) -> None:
         )
     db.commit()
 
-def numRequest (numRequest : int) -> None: 
+def seedProduceRequests (numRequests : int) -> None:
     for _ in range(numRequests):
         req_date = fake.date_between(start_date="-20d", end_date="today")
         MySQL.execute(
@@ -305,8 +275,8 @@ def numRequest (numRequest : int) -> None:
         )
     db.commit()
 
-def seedRequest () -> None: 
-    used_requests = random.sample(range(1, numRequests + 1), k=min(10, numRequests))
+def seedPickups (numPickups : int) -> None:
+    used_requests = random.sample(range(1, numRequests + 1), k=min(numPickups, numRequests))
     for req_id in used_requests:
         MySQL.execute(
             """INSERT INTO Pickup
@@ -370,7 +340,7 @@ def seedLogs (numLogs : int) -> None:
 def fetchAll (table: str) -> None:
     MySQL.execute(f"SELECT * FROM {table}")
     rows = MySQL.fetchall()
-    print(f"Retriving data for the table {table}")
+    print(f"Retrieving data for the table {table}")
     if rows == []:
         raise ValueError("Empty Value") 
     else:
@@ -402,7 +372,6 @@ def retrieveAll () -> None:
         fetchAll(table)
 
 def main ():
-    dataLoader()
     mysqlConnector()
 
     print(MySQL)
@@ -415,17 +384,17 @@ def main ():
     seedSchedules(numSchedules)
     seedHarvest(numHarvests)
     seedPestReports(numPestReports)
-    seedAssigments(numAssignments)
-    seedYieldPairs(pair)
+    seedAssignments(numAssignments)
+    seedYieldPairs(numYieldPairs)
     seedListing(numListings)
-    numRequest(numRequests)
-    seedRequest()
+    seedProduceRequests(numRequests)
+    seedPickups(numPickups)
     seedTasks(numTasks)
     seedSignUps(numSignUps)
     seedLogs(numLogs)
 
-    printing_databse = input("Type Yes to print database ").lower()
-    if printing_databse == 'yes':
+    printing_database = input("Type Yes to print database ").lower()
+    if printing_database == 'yes':
         retrieveAll()
 
     MySQL.close()
