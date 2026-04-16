@@ -53,7 +53,7 @@ numAssignments = 100
 numYieldPairs = 30
 numListings = 100
 numRequests = 100
-numPickups = 100
+numPickups = 1
 
 numTasks = 100
 task_descriptions = [
