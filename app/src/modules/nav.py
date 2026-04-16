@@ -15,25 +15,34 @@ def about_page_nav():
     st.sidebar.page_link("pages/30_About.py", label="About", icon="🧠")
 
 
-# ---- Role: pol_strat_advisor ------------------------------------------------
+# ---- Role: garden_admin ------------------------------------------------
 
-def pol_strat_home_nav():
+def garden_admin_home_nav():
     st.sidebar.page_link(
-        "pages/00_Pol_Strat_Home.py", label="Political Strategist Home", icon="👤"
+        "pages/20_Admin_Home.py", label="Garden Admin Home", icon="🏠"
+    )
+ 
+ 
+def admin_dashboard_nav():
+    st.sidebar.page_link(
+        "pages/21_Admin_Dashboard.py", label="Dashboard", icon="📊"
+    )
+ 
+ 
+def admin_plots_nav():
+    st.sidebar.page_link(
+        "pages/22_Admin_Plots.py", label="Plot Management", icon="🌱"
+    )
+ 
+ 
+def admin_workdays_nav():
+    st.sidebar.page_link(
+        "pages/23_Admin_Workdays.py", label="Workdays Manager", icon="📅"
     )
 
 
-def world_bank_viz_nav():
-    st.sidebar.page_link(
-        "pages/01_World_Bank_Viz.py", label="World Bank Visualization", icon="🏦"
-    )
-
-
-def map_demo_nav():
-    st.sidebar.page_link("pages/02_Map_Demo.py", label="Map Demonstration", icon="🗺️")
-
-
-# ---- Role: usaid_worker -----------------------------------------------------
+# ---- Role: plot_owner -----------------------------------------------------
+# TODO: add plot owner links here + update method names
 
 def usaid_worker_home_nav():
     st.sidebar.page_link(
@@ -65,7 +74,8 @@ def classification_nav():
     )
 
 
-# ---- Role: administrator ----------------------------------------------------
+# ---- Role: volunteer ----------------------------------------------------
+# TODO: add volunteer links here + update method names
 
 def admin_home_nav():
     st.sidebar.page_link("pages/20_Admin_Home.py", label="System Admin", icon="🖥️")
@@ -75,6 +85,9 @@ def ml_model_mgmt_nav():
     st.sidebar.page_link(
         "pages/21_ML_Model_Mgmt.py", label="ML Model Management", icon="🏢"
     )
+
+# ---- Role: food_bank_coordinator ----------------------------------------------------
+# TODO: add food bank coordinator links here + update method names
 
 
 # ---- Sidebar assembly -------------------------------------------------------
@@ -98,22 +111,20 @@ def SideBarLinks(show_home=False):
 
     if st.session_state["authenticated"]:
 
-        if st.session_state["role"] == "pol_strat_advisor":
-            pol_strat_home_nav()
-            world_bank_viz_nav()
-            map_demo_nav()
+        if st.session_state["role"] == "garden_admin":
+            garden_admin_home_nav()
+            admin_dashboard_nav()
+            admin_plots_nav()
+            admin_workdays_nav()
 
-        if st.session_state["role"] == "usaid_worker":
-            usaid_worker_home_nav()
-            ngo_directory_nav()
-            add_ngo_nav()
-            prediction_nav()
-            api_test_nav()
-            classification_nav()
+        if st.session_state["role"] == "plot_owner":
+            pass  # TODO: add plot owner nav calls here
 
-        if st.session_state["role"] == "administrator":
-            admin_home_nav()
-            ml_model_mgmt_nav()
+        if st.session_state["role"] == "volunteer":
+            pass  # TODO: add volunteer nav calls here
+ 
+        if st.session_state["role"] == "food_bank_coordinator":
+            pass  # TODO: add food bank coordinator nav calls here
 
     # About link appears at the bottom for all roles
     about_page_nav()
