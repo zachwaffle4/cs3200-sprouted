@@ -10,7 +10,6 @@ import streamlit as st
 def home_nav():
     st.sidebar.page_link("Home.py", label="Home", icon="🏠")
 
-
 def about_page_nav():
     st.sidebar.page_link("pages/30_About.py", label="About", icon="🧠")
 
@@ -21,20 +20,17 @@ def garden_admin_home_nav():
     st.sidebar.page_link(
         "pages/20_Admin_Home.py", label="Garden Admin Home", icon="🏠"
     )
- 
- 
+
 def admin_dashboard_nav():
     st.sidebar.page_link(
         "pages/21_Admin_Dashboard.py", label="Dashboard", icon="📊"
     )
- 
- 
+
 def admin_plots_nav():
     st.sidebar.page_link(
         "pages/22_Admin_Plots.py", label="Plot Management", icon="🌱"
     )
- 
- 
+
 def admin_workdays_nav():
     st.sidebar.page_link(
         "pages/23_Admin_Workdays.py", label="Workdays Manager", icon="📅"
@@ -49,24 +45,19 @@ def usaid_worker_home_nav():
         "pages/10_USAID_Worker_Home.py", label="USAID Worker Home", icon="🏠"
     )
 
-
 def ngo_directory_nav():
     st.sidebar.page_link("pages/14_NGO_Directory.py", label="NGO Directory", icon="📁")
 
-
 def add_ngo_nav():
     st.sidebar.page_link("pages/15_Add_NGO.py", label="Add New NGO", icon="➕")
-
 
 def prediction_nav():
     st.sidebar.page_link(
         "pages/11_Prediction.py", label="Regression Prediction", icon="📈"
     )
 
-
 def api_test_nav():
     st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
-
 
 def classification_nav():
     st.sidebar.page_link(
@@ -76,15 +67,14 @@ def classification_nav():
 
 # ---- Role: volunteer ----------------------------------------------------
 # TODO: add volunteer links here + update method names
-
 def admin_home_nav():
     st.sidebar.page_link("pages/20_Admin_Home.py", label="System Admin", icon="🖥️")
-
 
 def ml_model_mgmt_nav():
     st.sidebar.page_link(
         "pages/21_ML_Model_Mgmt.py", label="ML Model Management", icon="🏢"
     )
+
 
 # ---- Role: food_bank_coordinator ----------------------------------------------------
 # TODO: add food bank coordinator links here + update method names
@@ -122,7 +112,7 @@ def SideBarLinks(show_home=False):
 
         if st.session_state["role"] == "volunteer":
             pass  # TODO: add volunteer nav calls here
- 
+
         if st.session_state["role"] == "food_bank_coordinator":
             pass  # TODO: add food bank coordinator nav calls here
 
