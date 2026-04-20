@@ -28,7 +28,7 @@ def admin_dashboard_nav():
 
 def admin_plots_nav():
     st.sidebar.page_link(
-        "pages/22_Admin_Plots.py", label="Plot Management", icon="🌱"
+        "pages/22_Admin_Plots.py", label="Plot Manager", icon="🌱"
     )
 
 def admin_workdays_nav():
