@@ -72,7 +72,7 @@ if st.button('Act as Clark Kent, a Volunteer',
     st.session_state['role'] = 'volunteer'
     st.session_state['first_name'] = 'Clark'
     logger.info("Logging in as Volunteer Persona")
-    st.switch_page('pages/00_Pol_Strat_Home.py') # TODO: change this to the actual page for Volunteer
+    st.switch_page('pages/40_Clark_Home.py')
 
 if st.button('Act as Lucia Tran, a Food Bank Coordinator',
              type='primary',

@@ -1,9 +1,7 @@
 # Idea borrowed from https://github.com/fsmosca/sample-streamlit-authenticator
 
 # This file has functions to add links to the left sidebar based on the user's role.
-
 import streamlit as st
-
 
 # ---- General ----------------------------------------------------------------
 
@@ -40,39 +38,22 @@ def admin_workdays_nav():
 # ---- Role: plot_owner -----------------------------------------------------
 # TODO: add plot owner links here + update method names
 
-def usaid_worker_home_nav():
-    st.sidebar.page_link(
-        "pages/10_USAID_Worker_Home.py", label="USAID Worker Home", icon="🏠"
-    )
-
-def ngo_directory_nav():
-    st.sidebar.page_link("pages/14_NGO_Directory.py", label="NGO Directory", icon="📁")
-
-def add_ngo_nav():
-    st.sidebar.page_link("pages/15_Add_NGO.py", label="Add New NGO", icon="➕")
-
-def prediction_nav():
-    st.sidebar.page_link(
-        "pages/11_Prediction.py", label="Regression Prediction", icon="📈"
-    )
-
-def api_test_nav():
-    st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
-
-def classification_nav():
-    st.sidebar.page_link(
-        "pages/13_Classification.py", label="Classification Demo", icon="🌺"
-    )
-
 
 # ---- Role: volunteer ----------------------------------------------------
-# TODO: add volunteer links here + update method names
-def admin_home_nav():
-    st.sidebar.page_link("pages/20_Admin_Home.py", label="System Admin", icon="🖥️")
 
-def ml_model_mgmt_nav():
+def volunteer_open_tasks_nav():
     st.sidebar.page_link(
-        "pages/21_ML_Model_Mgmt.py", label="ML Model Management", icon="🏢"
+        "pages/41_Clark_Open_Tasks.py", label="Open Tasks", icon="📋"
+    )
+
+def volunteer_my_hours_nav():
+    st.sidebar.page_link(
+        "pages/42_Clark_My_Hours.py", label="My Hours", icon="⏱️"
+    )
+
+def volunteer_event_detail_nav():
+    st.sidebar.page_link(
+        "pages/43_Clark_Event_Detail.py", label="Event Detail", icon="📍"
     )
 
 
@@ -111,7 +92,9 @@ def SideBarLinks(show_home=False):
             pass  # TODO: add plot owner nav calls here
 
         if st.session_state["role"] == "volunteer":
-            pass  # TODO: add volunteer nav calls here
+            volunteer_open_tasks_nav()
+            volunteer_my_hours_nav()
+            volunteer_event_detail_nav()
 
         if st.session_state["role"] == "food_bank_coordinator":
             pass  # TODO: add food bank coordinator nav calls here
