@@ -18,22 +18,22 @@ def about_page_nav():
 
 def garden_admin_home_nav():
     st.sidebar.page_link(
-        "pages/20_Admin_Home.py", label="Garden Admin Home", icon="🏠"
+        "pages/00_Admin_Home.py", label="Garden Admin Home", icon="🏠"
     )
 
 def admin_dashboard_nav():
     st.sidebar.page_link(
-        "pages/21_Admin_Dashboard.py", label="Dashboard", icon="📊"
+        "pages/01_Admin_Dashboard.py", label="Dashboard", icon="📊"
     )
 
 def admin_plots_nav():
     st.sidebar.page_link(
-        "pages/22_Admin_Plots.py", label="Plot Manager", icon="🌱"
+        "pages/02_Admin_Plots.py", label="Plot Manager", icon="🌱"
     )
 
 def admin_workdays_nav():
     st.sidebar.page_link(
-        "pages/23_Admin_Workdays.py", label="Workdays Manager", icon="📅"
+        "pages/03_Admin_Workdays.py", label="Workdays Manager", icon="📅"
     )
 
 

@@ -54,7 +54,7 @@ if st.button("Act as Derek Washington, a Garden Administrator",
     # finally, we ask streamlit to switch to another page, in this case, the
     # landing page for this particular user type
     logger.info("Logging in as Garden Administrator Persona")
-    st.switch_page('pages/20_Admin_Home.py')
+    st.switch_page('pages/00_Admin_Home.py')
 
 if st.button('Act as Maria Santons, a Plot Owner',
              type='primary',
