@@ -57,35 +57,36 @@ col4.metric("Waitlisted", site_stats["waitlisted"], border=True)
 
 st.divider()
 
-
-# SECTION 2: Pending Plot Applications
+# Section 2: Pending Plot Applications
 st.write("## Pending Plot Applications")
+st.caption("Review and manage incoming plot applications from community members.")
 h1, h2, h3 = st.columns([3, 3, 2])
 h1.markdown("**Name**")
 h2.markdown("**Requested Plot**")
 h3.markdown("**Action**")
 
 for app in pending_applications:
-    c1, c2, c3, c4 = st.columns([3, 3, 1, 1])
-    c1.write(app["name"])
-    c2.write(app["requested_plot"])
+    with st.container(border=True):
+        c1, c2, c3, c4 = st.columns([3, 3, 1, 1])
+        c1.write(app["name"])
+        c2.write(app["requested_plot"])
 
-    if c3.button("Assign", key=f"assign_{app['id']}"):
-        # TODO: replace with:
-        # requests.put(f"{API_BASE}/applications/{app['id']}", json={"status": "approved"})
-        st.success(f"Assigned plot to {app['name']}!")
-        st.rerun()
+        if c3.button("Assign", key=f"assign_{app['id']}"):
+            # TODO: replace with:
+            # requests.put(f"{API_BASE}/applications/{app['id']}", json={"status": "approved"})
+            st.success(f"Assigned plot to {app['name']}!")
+            st.rerun()
 
-    if c4.button("Waitlist", key=f"waitlist_{app['id']}"):
-        # TODO: replace with:
-        # requests.put(f"{API_BASE}/applications/{app['id']}", json={"status": "waitlisted"})
-        st.info(f"Moved {app['name']} to waitlist.")
-        st.rerun()
+        if c4.button("Waitlist", key=f"waitlist_{app['id']}"):
+            # TODO: replace with:
+            # requests.put(f"{API_BASE}/applications/{app['id']}", json={"status": "waitlisted"})
+            st.info(f"Moved {app['name']} to waitlist.")
+            st.rerun()
 
 st.divider()
 
 
-# SECTION 3: Upcoming Workdays
+# Section 3: Upcoming Workdays
 st.write("## Upcoming Workdays")
 wd_cols = st.columns(2)
 for i, wd in enumerate(upcoming_workdays):
@@ -103,7 +104,7 @@ for i, wd in enumerate(upcoming_workdays):
 st.divider()
 
 
-# SECTION 4: Water Budget + Pest Reports
+# Section 4: Water Budget + Pest Reports
 st.write("## Water Management")
 with st.container(border=True):
     wc1, wc2 = st.columns(2)
@@ -117,7 +118,7 @@ with st.container(border=True):
 st.divider()
 
 
-# SECTION 5: Pest Reports
+# Section 5: Pest Reports
 # Table header
 st.subheader("Open Pest Reports")
 c1, c2, c3, c4 = st.columns([2, 3, 2, 3])
@@ -126,8 +127,9 @@ c2.write("**Issue**") # col 2 describes the pest issue being reported
 c3.write("**Severity**") # col 3 indicates how severe the issue is (e.g. low/med/high)
 c4.write("**Status**") # col 4 indicates the current status of the report
 for r in pest_reports:
-    c1, c2, c3, c4 = st.columns([2, 3, 2, 3]) # create 4 cols for each report
-    c1.write(r["plot"])
-    c2.write(r["issue"])
-    c3.write(r["severity"])
-    c4.write(r["status"])
+    with st.container(border=True):
+        c1, c2, c3, c4 = st.columns([2, 3, 2, 3]) # create 4 cols for each report
+        c1.write(r["plot"])
+        c2.write(r["issue"])
+        c3.write(r["severity"])
+        c4.write(r["status"])
