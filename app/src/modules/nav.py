@@ -40,6 +40,10 @@ def admin_workdays_nav():
 
 
 # ---- Role: volunteer ----------------------------------------------------
+def volunteer_home_nav():
+    st.sidebar.page_link(
+        "pages/40_Clark_Home.py", label="Volunteer Home", icon="🏠"
+    )
 
 def volunteer_open_tasks_nav():
     st.sidebar.page_link(
@@ -92,6 +96,7 @@ def SideBarLinks(show_home=False):
             pass  # TODO: add plot owner nav calls here
 
         if st.session_state["role"] == "volunteer":
+            volunteer_home_nav()
             volunteer_open_tasks_nav()
             volunteer_my_hours_nav()
             volunteer_event_detail_nav()

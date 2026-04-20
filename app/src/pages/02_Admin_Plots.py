@@ -96,11 +96,12 @@ h3.write("**Date Applied**")
 h4.write("**Promote**")
 
 for entry in waitlist_queue:
-    c1, c2, c3, c4 = st.columns([3, 3, 2, 1])
-    c1.write(entry["member"])
-    c2.write(entry["requested"])
-    c3.write(entry["date"])
-    if c4.button("Promote", key=f"promote_{entry['id']}"):
-        # TODO: PUT /waitlist/{id}/promote
-        st.success(f"Promoted {entry['member']}!")
-        st.rerun()
+    with st.container(border=True):
+        c1, c2, c3, c4 = st.columns([3, 3, 2, 1])
+        c1.write(entry["member"])
+        c2.write(entry["requested"])
+        c3.write(entry["date"])
+        if c4.button("Promote", key=f"promote_{entry['id']}"):
+            # TODO: PUT /waitlist/{id}/promote
+            st.success(f"Promoted {entry['member']}!")
+            st.rerun()
