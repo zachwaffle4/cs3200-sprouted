@@ -80,4 +80,4 @@ if st.button('Act as Lucia Tran, a Food Bank Coordinator',
     st.session_state['role'] = 'food_bank_coordinator'
     st.session_state['first_name'] = 'Lucia'
     logger.info("Logging in as Food Bank Coordinator Persona")
-    st.switch_page('pages/00_Pol_Strat_Home.py') # TODO: change this to the actual page for Food Bank Coordinator
+    st.switch_page('pages/50_Lucia_Dashboard.py') # TODO: change this to the actual page for Food Bank Coordinator
