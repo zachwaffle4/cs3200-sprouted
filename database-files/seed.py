@@ -332,15 +332,20 @@ def seedListing(numListings: int) -> None:
 
 
 def seedProduceRequests(numRequests: int) -> None:
-    for _ in range(numRequests):
+    pairs = set()
+    attempts = 0
+    while len(pairs) < numRequests and attempts < numRequests * 10:
+        pairs.add((random.randint(1, numOrgs), random.randint(1, numListings)))
+        attempts += 1
+    for org_id, listing_id in pairs:
         req_date = fake.date_between(start_date="-20d", end_date="today")
         MySQL.execute(
             """INSERT INTO Produce_Request
             (org_id, listing_id, requested_date, preferred_pickup_date, status)
             VALUES (%s,%s,%s,%s,%s)""",
             (
-                random.randint(1, numOrgs),
-                random.randint(1, numListings),
+                org_id,
+                listing_id,
                 req_date,
                 req_date + timedelta(days=random.randint(1, 5)),
                 random.choice(["pending", "approved", "denied", "completed"]),
@@ -480,6 +485,14 @@ def retrieveAll() -> None:
 
 def main():
     mysqlConnector()
+
+    MySQL.execute("SELECT COUNT(*) FROM Garden_Site")
+    (existing,) = MySQL.fetchone()
+    if existing > 0:
+        print(f"Database already seeded ({existing} Garden_Site rows). Skipping.")
+        MySQL.close()
+        db.close()
+        return
 
     print(MySQL)
     seedSites(numSites)
