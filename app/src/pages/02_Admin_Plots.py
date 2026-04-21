@@ -55,17 +55,20 @@ def api_delete(path):
 STATUS_DISPLAY = {"assigned": "Active", "vacant": "Vacant"}
 
 plots_raw = api_get("/plots") or []
-all_plots = [
-    {
+seen_plot_ids = set()
+all_plots = []
+for p in plots_raw:
+    if p["plot_id"] in seen_plot_ids:
+        continue
+    seen_plot_ids.add(p["plot_id"])
+    all_plots.append({
         "id":            p["plot_id"],
         "plot_label":    p.get("plot_name", f"Plot {p['plot_id']}"),
         "status":        STATUS_DISPLAY.get(p.get("occupancy_status", ""), p.get("occupancy_status", "Unknown")),
         "owner":         f"User {p['assigned_user_id']}" if p.get("assigned_user_id") else "—",
         "owner_id":      p.get("assigned_user_id"),
         "assignment_id": p.get("active_assignment_id"),
-    }
-    for p in plots_raw
-]
+    })
 
 # Waitlist from GET /waitlist
 waitlist_raw = api_get("/waitlist") or []
@@ -88,7 +91,7 @@ st.divider()
 # Filter bar — "Active" matches occupancy_status 'assigned', "Vacant" matches 'vacant'
 status_filter = st.radio(
     "Filter by Status",
-    ["All", "Active", "Vacant", "Waitlisted"],
+    ["All", "Active", "Vacant"],
     horizontal=True
 )
 filtered = [p for p in all_plots if status_filter == "All" or p["status"] == status_filter]

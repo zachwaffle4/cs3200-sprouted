@@ -10,7 +10,7 @@ SideBarLinks()
 API_BASE = "http://web-api:4000"
 SITE_ID = 1
 
-
+# helper functions for API calls
 def api_get(path, params=None):
     try:
         r = requests.get(f"{API_BASE}{path}", params=params, timeout=5)
@@ -19,7 +19,6 @@ def api_get(path, params=None):
     except Exception as e:
         logger.error("GET %s failed: %s", path, e)
         return None
-
 
 def api_put(path, payload):
     try:
@@ -31,23 +30,22 @@ def api_put(path, payload):
         return None
 
 
-# Site stats: derive from /plots (occupancy_status is 'assigned' or 'vacant')
+# Site stats: get from /plots (occupancy_status is 'assigned' or 'vacant')
 plots_data = api_get("/plots") or []
 assigned_count = sum(1 for p in plots_data if p.get("occupancy_status") == "assigned")
-vacant_count   = sum(1 for p in plots_data if p.get("occupancy_status") == "vacant")
+vacant_count = sum(1 for p in plots_data if p.get("occupancy_status") == "vacant")
 site_stats = {
-    "total":      len(plots_data),
-    "active":     assigned_count,
-    "vacant":     vacant_count,
-    "waitlisted": len(plots_data) - assigned_count - vacant_count,
+    "total": len(plots_data),
+    "active": assigned_count,
+    "vacant": vacant_count,
 }
 
 # Pending applications from GET /applications?status=pending
 apps_raw = api_get("/applications", {"status": "pending"}) or []
 pending_applications = [
     {
-        "id":             a["application_id"],
-        "name":           a["name"],
+        "id": a["application_id"],
+        "name": a["name"],
         "requested_plot": a.get("plot_name") or "Any Available",
     }
     for a in apps_raw
@@ -57,28 +55,26 @@ pending_applications = [
 workdays_raw = api_get("/workdays") or []
 upcoming_workdays = [
     {
-        "id":       w["workday_id"],
-        "name":     w["event_name"],
-        "date":     str(w.get("event_date", "")),
+        "id": w["workday_id"],
+        "name": w["event_name"],
+        "date": str(w.get("event_date", "")),
         "signed_up": w.get("signup_count", 0),
-        "needed":   max(int(w.get("volunteers_needed", 1)), 1),
+        "needed": max(int(w.get("volunteers_needed", 1)), 1),
     }
     for w in workdays_raw[:2]
 ]
 
-# Water budget — /sites/{id}/water-log not yet implemented; watering-schedules is a different concept
 water_budget = {"month": "April", "used_gal": 2400, "budget_gal": 8000}
-# TODO: replace with GET /sites/{SITE_ID}/water-log?month=current once route is implemented
 
 # Pest reports from /pest-reports (already filtered to open + in-progress by the API)
 pest_raw = api_get("/pest-reports") or []
 pest_reports = [
     {
-        "id":       r["report_id"],
-        "plot":     str(r.get("plot_id", "—")),
-        "issue":    r.get("description", "—"),
+        "id": r["report_id"],
+        "plot": str(r.get("plot_id", "—")),
+        "issue": r.get("description", "—"),
         "severity": r.get("severity", "—"),
-        "status":   r.get("status", "—"),
+        "status": r.get("status", "—"),
     }
     for r in pest_raw
 ]
@@ -89,11 +85,10 @@ st.title("Garden Administration Dashboard")
 
 # Section 1: Site Overview
 st.write("## Site Overview")
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total Plots",  site_stats["total"],      border=True)
-col2.metric("Active",       site_stats["active"],     border=True)
-col3.metric("Vacant",       site_stats["vacant"],     border=True)
-col4.metric("Waitlisted",   site_stats["waitlisted"], border=True)
+col1, col2, col3 = st.columns(3)
+col1.metric("Total Plots", site_stats["total"], border=True)
+col2.metric("Active", site_stats["active"], border=True)
+col3.metric("Vacant", site_stats["vacant"], border=True)
 
 st.divider()
 
@@ -107,22 +102,15 @@ h3.markdown("**Action**")
 
 for app in pending_applications:
     with st.container(border=True):
-        c1, c2, c3, c4 = st.columns([3, 3, 1, 1])
+        c1, c2, c3 = st.columns([3, 3, 1])
         c1.write(app["name"])
         c2.write(app["requested_plot"])
-        if c3.button("Assign", key=f"assign_{app['id']}"):
-            res = api_put(f"/applications/{app['id']}", {"status": "approved"})
-            if res is not None:
-                st.toast(f"Assigned plot to {app['name']}!")
-            else:
-                st.toast("Applications endpoint not yet implemented.", icon="⚠️")
-            st.rerun()
-        if c4.button("Waitlist", key=f"waitlist_{app['id']}"):
+        if c3.button("Waitlist", key=f"waitlist_{app['id']}"):
             res = api_put(f"/applications/{app['id']}", {"status": "waitlisted"})
             if res is not None:
                 st.toast(f"Moved {app['name']} to waitlist.")
             else:
-                st.toast("Applications endpoint not yet implemented.", icon="⚠️")
+                st.toast("Failed to update application.", icon="⚠️")
             st.rerun()
 
 st.divider()

@@ -165,10 +165,10 @@ st.caption("Create a new workday event with tasks for volunteers.")
 
 with st.form("new_workday_form"):
     event_name = st.text_input("Event Name")
-    date_col, time_col = st.columns(2)
+    date_col, start_col, end_col = st.columns(3)
     event_date       = date_col.date_input("Date")
-    event_start_time = time_col.time_input("Start Time")
-    event_end_time   = time_col.time_input("End Time")
+    event_start_time = start_col.time_input("Start Time")
+    event_end_time   = end_col.time_input("End Time")
     event_desc       = st.text_area("Description")
     volunteers_needed = st.number_input("Volunteers Needed", min_value=1, max_value=100, value=12)
 
@@ -195,8 +195,8 @@ with st.form("new_workday_form"):
                     if task.get("name", "").strip():
                         task_payload = {
                             "task_description": task["name"],
-                            "urgency":          task.get("est_time", ""),
-                            "location_note":    f"{task.get('people_needed', '')} people needed",
+                            "urgency":          task.get("urgency", "low"),
+                            "location_note":    task.get("location", ""),
                         }
                         if api_post(f"/workdays/{new_wd_id}/tasks", task_payload):
                             tasks_created += 1
@@ -212,8 +212,8 @@ st.write("**Tasks** *(volunteers will sign up for these)*")
 if st.session_state["new_tasks"]:
     h1, h2, h3, h4 = st.columns([4, 2, 2, 1])
     h1.write("**Task**")
-    h2.write("**Est. Time**")
-    h3.write("**People**")
+    h2.write("**Urgency**")
+    h3.write("**Location**")
     h4.write("**Del.**")
 
     for i, task in enumerate(st.session_state["new_tasks"]):
@@ -221,13 +221,14 @@ if st.session_state["new_tasks"]:
         st.session_state["new_tasks"][i]["name"] = c1.text_input(
             "Task", value=task["name"], key=f"tname_{i}", label_visibility="collapsed"
         )
-        st.session_state["new_tasks"][i]["est_time"] = c2.text_input(
-            "Time", value=task["est_time"], key=f"ttime_{i}",
-            label_visibility="collapsed", placeholder="e.g. 2 hrs"
+        st.session_state["new_tasks"][i]["urgency"] = c2.selectbox(
+            "Urgency", ["low", "medium", "high"],
+            index=["low", "medium", "high"].index(task.get("urgency", "low")),
+            key=f"turgency_{i}", label_visibility="collapsed"
         )
-        st.session_state["new_tasks"][i]["people_needed"] = c3.number_input(
-            "People", value=task["people_needed"], key=f"tpeople_{i}",
-            label_visibility="collapsed", min_value=1
+        st.session_state["new_tasks"][i]["location"] = c3.text_input(
+            "Location", value=task.get("location", ""), key=f"tloc_{i}",
+            label_visibility="collapsed", placeholder="e.g. Bed A"
         )
         if c4.button("🗑️", key=f"rm_task_{i}"):
             st.session_state["new_tasks"].pop(i)
@@ -236,5 +237,5 @@ else:
     st.caption("No tasks yet.")
 
 if st.button("+ Add Task"):
-    st.session_state["new_tasks"].append({"name": "", "est_time": "", "people_needed": 2})
+    st.session_state["new_tasks"].append({"name": "", "urgency": "low", "location": ""})
     st.rerun()
