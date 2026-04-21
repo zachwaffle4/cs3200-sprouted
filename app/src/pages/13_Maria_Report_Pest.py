@@ -104,7 +104,7 @@ else:
     for r in maria_reports:
         with st.container(border=True):
             c1, c2, c3, c4, c5 = st.columns([2, 2, 4, 2, 2])
-            c1.write(str(r.get("date_reported", "—")))
+            c1.write(str(r.get("date_reported", "—"))[:16].strip(", "))
             c2.write(f"Plot {r.get('plot_id', '—')}")
             c3.write(r.get("description", "—"))
             c4.write(r.get("severity", "—"))

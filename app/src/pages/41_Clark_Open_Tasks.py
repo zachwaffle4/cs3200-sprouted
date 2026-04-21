@@ -34,7 +34,7 @@ def get_workdays():
                 result.append({
                     "id": w["workday_id"],
                     "title": w["event_name"],
-                    "date": w["event_date"],
+                    "date": str(w["event_date"])[:16].strip(", "),
                     "time": "",
                     "location": f"Site {w['site_id']}",
                     "signed_up": w["signup_count"],

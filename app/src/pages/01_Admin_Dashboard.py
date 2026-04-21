@@ -64,7 +64,7 @@ upcoming_workdays = [
     {
         "id": w["workday_id"],
         "name": w["event_name"],
-        "date": str(w.get("event_date", "")),
+        "date": str(w.get("event_date", ""))[:16].strip(", "),
         "signed_up": w.get("signup_count", 0),
         "needed": max(int(w.get("volunteers_needed", 1)), 1),
     }

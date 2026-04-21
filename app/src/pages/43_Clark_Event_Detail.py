@@ -27,7 +27,7 @@ def get_workday_detail(workday_id):
                 return {
                     "id": wd["workday_id"],
                     "title": wd["event_name"],
-                    "date": wd["event_date"],
+                    "date": str(wd["event_date"])[:16].strip(", "),
                     "time": "",
                     "location": f"Site {wd['site_id']}",
                     "signed_up": wd["signup_count"],
