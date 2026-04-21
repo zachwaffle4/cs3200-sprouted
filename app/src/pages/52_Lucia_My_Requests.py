@@ -1,29 +1,54 @@
-import streamlit as st
+﻿import streamlit as st
 import requests
 from modules.nav import SideBarLinks
 
-API_BASE = "http://api:4000"
+API_BASE = "http://web-api:4000"
 
 
-def get_my_requests(food_bank_id):
+def parse_date(date_str):
+    if not date_str:
+        return ""
     try:
-        r = requests.get(f"{API_BASE}/surplus")
+        from datetime import datetime
+
+        d = datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S GMT")
+        return d.strftime("%Y-%m-%d")
+    except Exception:
+        return str(date_str)
+
+
+def get_my_requests(org_id):
+    try:
+        r = requests.get(f"{API_BASE}/surplus/requests")
         if r.status_code == 200:
-            listings = r.json()
+            data = r.json()
             result = []
-            for l in listings:
-                if l.get("status") in ("pending", "completed"):
+            for item in data:
+                if item.get("org_id") == org_id:
+                    status = item.get("status", "pending")
+                    display_status = {
+                        "pending": "Pending",
+                        "approved": "Confirmed",
+                        "completed": "Completed",
+                        "denied": "Cancelled",
+                    }.get(status, status.capitalize())
                     result.append(
                         {
-                            "id": l.get("listing_id", l.get("id")),
-                            "crop": f"Crop {l.get('crop_id', '?')}",
-                            "type": "Vegetable",
-                            "lbs": l.get("quantity_lbs", 0),
-                            "site": f"Site {l.get('site_id', '?')}",
-                            "plot": f"Plot {l.get('plot_id', '?')}",
-                            "preferred_date": str(l.get("listing_date", "")),
-                            "status": l.get("status", "Pending").capitalize(),
-                            "confirmed_date": None,
+                            "id": item.get("request_id"),
+                            "crop": item.get("crop_name", "Produce"),
+                            "type": item.get("crop_type", "Vegetable"),
+                            "lbs": float(item.get("quantity_lbs", 0)),
+                            "site": item.get("site_name", "Garden"),
+                            "plot": item.get("plot_name", "Plot"),
+                            "preferred_date": parse_date(
+                                item.get("preferred_pickup_date", "")
+                            ),
+                            "status": display_status,
+                            "confirmed_date": (
+                                parse_date(item.get("preferred_pickup_date", ""))
+                                if status == "approved"
+                                else None
+                            ),
                         }
                     )
             if result:
@@ -55,91 +80,27 @@ def get_my_requests(food_bank_id):
             "status": "Pending",
             "confirmed_date": None,
         },
-        {
-            "id": 103,
-            "crop": "Sweet basil",
-            "type": "Herb",
-            "lbs": 3,
-            "site": "Riverside Plots",
-            "plot": "Plot 3",
-            "preferred_date": "Apr 5, 2026",
-            "status": "Pending",
-            "confirmed_date": None,
-        },
-        {
-            "id": 104,
-            "crop": "Collard greens",
-            "type": "Vegetable",
-            "lbs": 6,
-            "site": "Riverside Plots",
-            "plot": "Plot 11",
-            "preferred_date": "Mar 28, 2026",
-            "status": "Completed",
-            "confirmed_date": "Mar 28, 2026",
-        },
-        {
-            "id": 105,
-            "crop": "Jalapeño peppers",
-            "type": "Vegetable",
-            "lbs": 5,
-            "site": "Elm Street Garden",
-            "plot": "Plot 22",
-            "preferred_date": "Mar 25, 2026",
-            "status": "Completed",
-            "confirmed_date": "Mar 25, 2026",
-        },
     ]
 
 
 def cancel_request(request_id):
     try:
-        # Correct endpoint from surplus_routes.py
         r = requests.delete(f"{API_BASE}/surplus/requests/{request_id}")
         return r.status_code in (200, 204)
     except Exception:
         return False
 
 
-st.set_page_config(page_title="My Requests – Sprouted", layout="wide")
-
+st.set_page_config(page_title="My Requests - Sprouted", layout="wide")
 SideBarLinks()
 
-st.markdown(
-    """
-<style>
-    .status-confirmed {
-        background: #e8f5e9; color: #2d6a2d;
-        border-radius: 4px; padding: 2px 10px; font-size: 11px; font-weight: 500;
-    }
-    .status-pending {
-        background: #fff3e0; color: #e65100;
-        border-radius: 4px; padding: 2px 10px; font-size: 11px; font-weight: 500;
-    }
-    .status-completed {
-        background: #f3f4f6; color: #666;
-        border-radius: 4px; padding: 2px 10px; font-size: 11px; font-weight: 500;
-    }
-    .req-title { font-size: 14px; font-weight: 600; }
-    .req-sub { font-size: 12px; color: #888; margin-top: 2px; }
-    .summary-box {
-        background: #f0f7f0;
-        border: 1px solid #c8dcc8;
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 16px;
-    }
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
 user = st.session_state.get("user", {"id": 1, "name": "Lucia Tran"})
-food_bank_id = user.get("id", 1)
+org_id = user.get("id", 1)
 
 st.title("My Requests")
 st.caption("Track and manage your pickup requests")
 
-requests_data = get_my_requests(food_bank_id)
+requests_data = get_my_requests(org_id)
 
 total_lbs = sum(r["lbs"] for r in requests_data if r["status"] == "Completed")
 pending_count = sum(1 for r in requests_data if r["status"] == "Pending")
@@ -147,9 +108,9 @@ confirmed_count = sum(1 for r in requests_data if r["status"] == "Confirmed")
 
 st.markdown(
     f"""
-<div class="summary-box">
+<div style="background:#f0f7f0;border:1px solid #c8dcc8;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
     <strong>Summary</strong> &nbsp;·&nbsp;
-    <span style="color:#2d6a2d">{total_lbs} lbs received to date</span> &nbsp;·&nbsp;
+    <span style="color:#2d6a2d">{total_lbs:.1f} lbs received to date</span> &nbsp;·&nbsp;
     {confirmed_count} confirmed upcoming &nbsp;·&nbsp;
     {pending_count} pending approval
 </div>
@@ -158,9 +119,10 @@ st.markdown(
 )
 
 status_filter = st.radio(
-    "Filter by status", ["All", "Pending", "Confirmed", "Completed"], horizontal=True
+    "Filter by status",
+    ["All", "Pending", "Confirmed", "Completed", "Cancelled"],
+    horizontal=True,
 )
-
 filtered = (
     requests_data
     if status_filter == "All"
@@ -170,39 +132,45 @@ filtered = (
 if not filtered:
     st.info("No requests found for this filter.")
 
-for req in filtered:
+for item in filtered:
     c1, c2, c3 = st.columns([4, 2, 1])
-
-    status_class = f"status-{req['status'].lower()}"
-
     with c1:
-        st.markdown(
-            f"""
-        <div class="req-title">{req['crop']} — {req['lbs']} lbs</div>
-        <div class="req-sub">{req['site']} · {req['plot']} · Preferred: {req['preferred_date']}</div>
-        """,
-            unsafe_allow_html=True,
+        st.markdown(f"**{item['crop']} - {item['lbs']:.1f} lbs**")
+        st.caption(
+            f"{item['site']} · {item['plot']} · Preferred: {item['preferred_date']}"
         )
-
     with c2:
+        colors = {
+            "Pending": "#fff3e0",
+            "Confirmed": "#e8f5e9",
+            "Completed": "#f3f4f6",
+            "Cancelled": "#fce4e4",
+        }
+        text_colors = {
+            "Pending": "#e65100",
+            "Confirmed": "#2d6a2d",
+            "Completed": "#666",
+            "Cancelled": "#a32d2d",
+        }
+        bg = colors.get(item["status"], "#f3f4f6")
+        tc = text_colors.get(item["status"], "#666")
         st.markdown(
-            f'<span class="{status_class}">{req["status"]}</span>',
+            f'<span style="background:{bg};color:{tc};border-radius:4px;padding:2px 10px;font-size:11px;font-weight:500">{item["status"]}</span>',
             unsafe_allow_html=True,
         )
-        if req["confirmed_date"]:
-            st.caption(f"Date: {req['confirmed_date']}")
-
+        if item["confirmed_date"]:
+            st.caption(f"Date: {item['confirmed_date']}")
     with c3:
-        if req["status"] == "Pending":
-            if st.button("Cancel", key=f"cancel_req_{req['id']}"):
-                ok = cancel_request(req["id"])
+        if item["status"] == "Pending":
+            if st.button("Cancel", key=f"cancel_req_{item['id']}"):
+                ok = cancel_request(item["id"])
                 if ok:
-                    st.success(f"Request for {req['crop']} cancelled.")
+                    st.success("Cancelled.")
                     st.rerun()
                 else:
-                    st.error("Could not cancel. Please try again.")
-        elif req["status"] == "Confirmed":
-            st.button("View details", key=f"view_{req['id']}")
+                    st.error("Could not cancel.")
+        elif item["status"] == "Confirmed":
+            st.button("View details", key=f"view_{item['id']}")
     st.divider()
 
 st.caption(f"Showing {len(filtered)} of {len(requests_data)} requests")

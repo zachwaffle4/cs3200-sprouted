@@ -1,30 +1,54 @@
-import logging
-import requests
 import streamlit as st
-from modules.nav import SideBarLinks
+import requests
 
-logger = logging.getLogger(__name__)
+# from modules.nav import SideBarLinks
 
-st.set_page_config(layout="wide")
-
-SideBarLinks()
-
-API_BASE = "http://api:4000"
+API_BASE = "http://web-api:4000"
 
 
-def get_workday_tasks(workday_id):
+def get_workday_detail(workday_id):
     try:
-        r = requests.get(f"{API_BASE}/workdays/{workday_id}/tasks")
+        r = requests.get(f"{API_BASE}/workdays")
+        tasks_r = requests.get(f"{API_BASE}/workdays/{workday_id}/tasks")
         if r.status_code == 200:
-            return r.json()
+            workdays = r.json()
+            wd = next((w for w in workdays if w["workday_id"] == workday_id), None)
+            if wd:
+                tasks = []
+                if tasks_r.status_code == 200:
+                    for t in tasks_r.json():
+                        tasks.append(
+                            {
+                                "id": t["task_id"],
+                                "name": t["task_description"],
+                                "hours": 2.0,
+                                "spots_left": 1,
+                                "full": t.get("status") == "completed",
+                                "urgent": t.get("urgency") == "high",
+                                "description": t.get(
+                                    "location_note", "No description available."
+                                ),
+                            }
+                        )
+                return {
+                    "id": wd["workday_id"],
+                    "title": wd["event_name"],
+                    "date": wd["event_date"],
+                    "time": "",
+                    "location": f"Site {wd['site_id']}",
+                    "signed_up": wd["signup_count"],
+                    "capacity": wd["volunteers_needed"],
+                    "needs_help": wd["spots_remaining"] < 5,
+                    "tasks": tasks,
+                }
     except Exception:
         pass
     return {
-        "id": 2,
+        "id": workday_id,
         "title": "Fall Greenhouse Prep",
         "date": "Nov 10, 2026",
         "time": "9:00 AM – 1:00 PM",
-        "location": "Elm Street Community Garden, 42 Elm St",
+        "location": "Elm Street Community Garden",
         "signed_up": 3,
         "capacity": 12,
         "needs_help": True,
@@ -36,7 +60,7 @@ def get_workday_tasks(workday_id):
                 "spots_left": 1,
                 "full": False,
                 "urgent": True,
-                "description": "Pot and label 60+ seedlings for winter storage. No experience needed, gloves provided.",
+                "description": "Pot and label 60+ seedlings for winter storage.",
             },
             {
                 "id": 21,
@@ -45,7 +69,7 @@ def get_workday_tasks(workday_id):
                 "spots_left": 4,
                 "full": False,
                 "urgent": False,
-                "description": "Walk the garden beds and flag any broken or clogged drip emitters for repair. Bring a marker.",
+                "description": "Walk the garden beds and flag any broken drip emitters.",
             },
             {
                 "id": 22,
@@ -54,7 +78,7 @@ def get_workday_tasks(workday_id):
                 "spots_left": 0,
                 "full": True,
                 "urgent": False,
-                "description": "Clean and oil hand tools before winter. All supplies at the shed.",
+                "description": "Clean and oil hand tools before winter.",
             },
         ],
     }
@@ -64,7 +88,7 @@ def signup_for_task(workday_id, task_id, volunteer_id):
     try:
         r = requests.post(
             f"{API_BASE}/workdays/{workday_id}/signups",
-            json={"task_id": task_id, "volunteer_id": volunteer_id},
+            json={"user_id": volunteer_id},
         )
         return r.status_code in (200, 201)
     except Exception:
@@ -72,6 +96,8 @@ def signup_for_task(workday_id, task_id, volunteer_id):
 
 
 st.set_page_config(page_title="Event Detail – Sprouted", layout="wide")
+
+# SideBarLinks()
 
 st.markdown(
     """
@@ -111,13 +137,20 @@ volunteer_id = user.get("id", 3)
 if st.button("← Back to Open Tasks"):
     st.switch_page("pages/41_Clark_Open_Tasks.py")
 
-workday_id = st.session_state.get("selected_workday_id", 2)
-wd = get_workday_tasks(workday_id)
+workday_id = st.session_state.get("selected_workday_id", 83)
+wd = get_workday_detail(workday_id)
+
+if isinstance(wd, list):
+    wd = wd[0] if wd else {}
+
+if not wd:
+    st.error("Could not load workday details.")
+    st.stop()
 
 st.markdown(f"## {wd['title']}")
 st.caption(f"{wd['date']} · {wd['time']} · {wd['location']}")
 
-spots_total_left = sum(t["spots_left"] for t in wd["tasks"] if not t["full"])
+spots_total_left = sum(t["spots_left"] for t in wd.get("tasks", []) if not t["full"])
 badge_html = ""
 if wd.get("needs_help"):
     badge_html += '<span class="needs-help-chip">Needs Help</span>'
@@ -125,21 +158,8 @@ badge_html += f'<span class="spots-chip">{spots_total_left} spots left</span>'
 st.markdown(badge_html, unsafe_allow_html=True)
 st.markdown("")
 
-pct = wd["signed_up"] / wd["capacity"] if wd["capacity"] else 0
+pct = wd["signed_up"] / wd["capacity"] if wd.get("capacity") else 0
 st.progress(pct, text=f"{wd['signed_up']} / {wd['capacity']} signed up")
-
-st.markdown(
-    f"""
-<div style="
-    background:#f0f4f0; border:1px solid #c8d8c8; border-radius:8px;
-    height:80px; display:flex; align-items:center; justify-content:center;
-    color:#6a8a6a; font-size:0.85rem; margin-top:0.5rem; margin-bottom:1.25rem;
-">
-    📍 Map — {wd['location']}
-</div>
-""",
-    unsafe_allow_html=True,
-)
 
 st.markdown("### Available Tasks")
 st.caption("Sign up for one or more tasks. Urgent tasks are short on volunteers.")
@@ -206,9 +226,7 @@ for task in wd.get("tasks", []):
                         }
                     )
                     st.session_state["upcoming_signups"] = upcoming
-                    st.success(
-                        f"You're signed up for '{task['name']}'! It'll be logged after the event."
-                    )
+                    st.success(f"You're signed up for '{task['name']}'!")
                     st.rerun()
                 else:
                     st.error("Sign-up failed. Please try again.")
@@ -220,7 +238,9 @@ goal_hrs = 60.0
 remaining = goal_hrs - total_hrs
 
 my_signed_up_hrs = sum(
-    t["hours"] for t in wd["tasks"] if f"{wd['id']}_{t['id']}" in signed_up_tasks
+    t["hours"]
+    for t in wd.get("tasks", [])
+    if f"{wd['id']}_{t['id']}" in signed_up_tasks
 )
 note = ""
 if my_signed_up_hrs > 0:

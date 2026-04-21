@@ -147,15 +147,11 @@ st.caption("Donation tracking and seasonal reporting")
 col1, col2 = st.columns(2)
 with col1:
     season = st.selectbox(
-        "Time range",
-        ["Current season (2026)", "Last 6 months", "Last 12 months"],
-        label_visibility="visible",
+        "Time range", ["Current season (2026)", "Last 6 months", "Last 12 months"]
     )
 with col2:
     compare_to = st.selectbox(
-        "Compare to",
-        ["Previous season (2025)", "Two seasons ago (2024)"],
-        label_visibility="visible",
+        "Compare to", ["Previous season (2025)", "Two seasons ago (2024)"]
     )
 
 season_val = "2026" if "2026" in season else "2025"
