@@ -8,9 +8,6 @@ import streamlit as st
 def home_nav():
     st.sidebar.page_link("Home.py", label="Home", icon="🏠")
 
-def about_page_nav():
-    st.sidebar.page_link("pages/30_About.py", label="About", icon="🧠")
-
 
 # ---- Role: garden_admin ------------------------------------------------
 
@@ -84,7 +81,7 @@ def SideBarLinks(show_home=False):
     """
 
     # Logo appears at the top of the sidebar on every page
-    st.sidebar.image("assets/logo.png", width=150)
+    st.sidebar.image("assets/sprouted_logo.svg", width=300)
 
     # If no one is logged in, send them to the Home (login) page
     if "authenticated" not in st.session_state:
@@ -115,9 +112,6 @@ def SideBarLinks(show_home=False):
             lucia_dashboard_nav()
             lucia_browse_nav()
             lucia_requests_nav()
-
-    # About link appears at the bottom for all roles
-    about_page_nav()
 
     if st.session_state["authenticated"]:
         if st.sidebar.button("Logout"):
