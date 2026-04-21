@@ -1,135 +1,171 @@
-# Spring 2026 CS 3200 Project Template
+# 🌱 Sprouted — Community Garden Management Platform
 
-This is a template repo for Dr. Fontenot's Spring 2026 CS 3200 Course Project.
+Sprouted is a full-stack web application for managing community garden operations. It supports four distinct user roles — Garden Admin, Plot Owner, Volunteer, and Food Bank Partner — each with a dedicated set of features for plot management, harvest tracking, volunteer coordination, and surplus produce distribution.
 
-It includes most of the infrastructure setup (containers), sample databases, and example UI pages. Explore it fully and ask questions!
+---
 
-## Prerequisites
+## Team Members
 
-- A GitHub Account
-- A terminal-based git client or GUI Git client such as GitHub Desktop or the Git plugin for VSCode.
-- A distribution of Python running on your laptop. The distribution supported by the course is [Anaconda](https://www.anaconda.com/download) or [Miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install).
-  - Create a new Python 3.11 environment in `conda` named `db-proj` by running:  
-     ```bash
-     conda create -n db-proj python=3.11
-     ```
-  - Install the Python dependencies listed in `api/requirements.txt` and `app/src/requirements.txt` into your local Python environment. You can do this by running `pip install -r requirements.txt` in each respective directory.
-     ```bash
-     cd api
-     pip install -r requirements.txt
-     cd ../app/src
-     pip install -r requirements.txt
-     ```
-     Note that the `..` means go to the parent folder of the folder you're currently in (which is `api/` after the first command).
-     > **Why install locally if everything runs in Docker?** Installing the packages locally lets your IDE (VSCode) provide autocompletion, linting, and error highlighting as you write code. The app itself always runs inside the Docker containers — the local install is just for editor support.
-- VSCode with the Python Plugin installed
-  - You may use some other Python/code editor.  However, Course staff will only support VS Code. 
+| Name |
+|---|
+| Emanuel Galindo Garcia |
+| Jackson Zheng |
+| Shloka Nathan |
+| Zach Harel |
+| Ayaan Imtiaz |
 
+---
 
-## Structure of the Repo
+## Tech Stack
 
-- This repository is organized into five main directories:
-  - `./app` - the Streamlit app
-  - `./api` - the Flask REST API
-  - `./database-files` - SQL scripts to initialize the MySQL database
-  - `./datasets` - folder for storing datasets
-  - `./ml-src` - folder for ML model development (Jupyter notebooks, training scripts)
+| Layer | Technology |
+|---|---|
+| Frontend | Python · Streamlit |
+| Backend | Python · Flask (REST API) |
+| Database | MySQL 9 |
+| Infrastructure | Docker · Docker Compose |
 
-- The repo also contains a `docker-compose.yaml` file that is used to set up the Docker containers for the front end app, the REST API, and MySQL database. 
+---
 
-## Suggestion for Learning the Project Code Base
+## Project Structure
 
-If you are not familiar with web app development, this code base might be confusing. But don't worry, we'll get through it together. Here are some suggestions for learning the code base:
+```
+cs3200-sprouted/
+├── app/                    # Streamlit frontend
+│   └── src/
+│       ├── Home.py         # Landing page / role selector
+│       ├── pages/          # Role-specific pages
+│       └── modules/nav.py  # Sidebar navigation (RBAC)
+├── api/                    # Flask REST API
+│   ├── backend/            # Route blueprints and DB connection
+│   ├── .env.template       # Environment variable template
+│   └── requirements.txt
+├── database-files/
+│   ├── sprouted-def.sql    # Schema definition (auto-run on first start)
+│   └── seed.py             # Seed script (auto-run on API startup)
+├── docker-compose.yaml
+└── README.md
+```
 
-1. Start by exploring the `./app` directory. This is where the Streamlit app is located. The Streamlit app is a Python-based web app that is used to interact with the user. It's a great way to build a simple web app without having to learn a lot of web development.
-1. Next, explore the `./api` directory. This is where the Flask REST API is located. The REST API is used to interact with the database and perform other server-side tasks. You might also consider this the "application logic" or "business logic" layer of your app. 
-1. Finally, explore the `./database-files` directory. This is where the SQL scripts are located that will be used to initialize the MySQL database.
-1. Bonus: If you want to have a totally separate copy of the Template Repo on your laptop that you can use to explore and try things without messing up your team repo, see *Setting Up a Personal Testing Repo (Optional)* section below. 
+---
 
-## Setting Up the Repos
-<details>
-<summary>Setting Up a Personal Sandbox Repo (Optional)</summary>
+## Getting Started
 
-### Setting Up a Personal Sandbox Repo (Optional)
+### Prerequisites
 
-**Before you start**: You need to have a GitHub account and a terminal-based git client or GUI Git client such as GitHub Desktop or the Git plugin for VSCode.
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- [Git](https://git-scm.com/) for cloning the repository
 
-1. Clone this repo to your local machine.
-   1. You can do this by clicking the green "Code" button on the top right of the repo page and copying the URL. Then, in your terminal, run `git clone <URL>`.
-   1. Or, you can use the GitHub Desktop app to clone the repo. See [this page](https://docs.github.com/en/desktop/adding-and-cloning-repositories/cloning-a-repository-from-github-to-github-desktop) of the GitHub Desktop Docs for more info. 
-1. Open the repository folder in VSCode.
-1. Set up the `.env` file in the `api` folder based on the `.env.template` file.
-   1. Make a copy of the `.env.template` file and name it `.env`. 
-   1. Open the new `.env` file. 
-   1. On the last line, delete the `<...>` placeholder text, and put a password. Don't reuse any passwords you use for any other services (email, etc.) 
-1. For running the testing containers (for your personal repo), you will tell `docker compose` to use a different configuration file than the typical one.  The one you will use for testing is `sandbox.yaml`.
-   1. `docker compose -f sandbox.yaml up -d` to start all the containers in the background
-   1. `docker compose -f sandbox.yaml down` to shutdown and delete the containers
-   1. `docker compose -f sandbox.yaml up db -d` only start the database container (replace db with api or app for the other two services as needed)
-   1. `docker compose -f sandbox.yaml stop` to "turn off" the containers but not delete them.
-</details>
+### 1 — Clone the Repository
 
-### Setting Up Your Team's Repo
+```bash
+git clone https://github.com/zachwaffle4/cs3200-sprouted.git
+cd cs3200-sprouted
+```
 
-**Before you start**: As a team, one person needs to assume the role of _Team Project Repo Owner_.
+### 2 — Create the `.env` File
 
-1. The Team Project Repo Owner needs to **fork** this template repo into their own GitHub account **and give the repo a name consistent with your project's name**. If you're worried that the repo is public, don't. Every team is doing a different project.
-1. In the newly forked team repo, the Team Project Repo Owner should go to the **Settings** tab, choose **Collaborators and Teams** on the left-side panel. Add each of your team members to the repository with Write access.
+The API and database containers both require a shared secrets file at **`api/.env`**.
 
-**Remaining Team Members**
+Copy the template and fill in your values:
 
-1. Each of the other team members will receive an invitation to join.
-1. Once you have accepted the invitation, you should clone the Team's Project Repo to your local machine.
-1. Set up the `.env` file in the `api` folder based on the `.env.template` file.
-1. For running the testing containers (for your team's repo):
-   1. `docker compose up -d` to start all the containers in the background
-   1. `docker compose down` to shutdown and delete the containers
-   1. `docker compose up db -d` only start the database container (replace db with api or app for the other two services as needed)
-   1. `docker compose stop` to "turn off" the containers but not delete them.
+```bash
+cp api/.env.template api/.env
+```
 
-**Note:** You can also use the Docker Desktop GUI to start and stop the containers after the first initial run.
+Then open `api/.env` and set your passwords:
 
-## Important Tips
+```env
+SECRET_KEY=your_flask_secret_key_here
+DB_USER=root
+DB_HOST=db
+DB_PORT=3306
+DB_NAME=sprouted
+MYSQL_ROOT_PASSWORD=your_strong_password_here
+```
 
-1. In general, any changes you make to the api code base (REST API) or the Streamlit app code should be *hot reloaded* when the files are saved.  This means that the changes should be immediately available.  
-   1. Don't forget to click the **Always Rerun** button in the browser tab of the Streamlit app for it to reload with changes.
-   1. Sometimes, a bug in the code will shut the containers down.  If this is the case, try and fix the bug in the code.  Then you can restart the `app` container in Docker Desktop or restart all the containers with `docker compose restart` (no *-d* flag).
-1. The MySQL Container is different. 
-   1. When the MySQL container is ***created*** the first time, it will execute any `.sql` files in the `./database-files` folder. **Important:** it will execute them in alphabetical order.  
-   1. The MySQL Container's log files are your friend! Remember, you can access them in Docker Desktop by going to the MySQL Container, and clicking on the `Logs` tab.  If there are errors in your .sql files as it is trying to run them, there will be a message in the logs. You can search 🔍 for `Error` to find them more quickly. 
-   1. If you need to update anything in any of your SQL files, you **MUST** recreate the MySQL container (rather than just stopping and restarting it).  You can recreate the MySQL container by using the following command: `docker compose down db -v && docker compose up db -d`. 
-      1. `docker compose down db -v` stops and deletes the MySQL container and the volume attached to it. 
-      1. `docker compose up db -d` will create a new db container and re-run the files in the `database-files` folder. 
+> **Important:** `DB_HOST` must remain `db` — that is the Docker service hostname for the MySQL container. Do not change it to `localhost`.
 
-## Handling User Role Access and Control
+### 3 — Start All Containers
 
-In most applications, when a user logs in, they assume a particular role in the app. For instance, when one logs in to a stock price prediction app, they may be a single investor, a portfolio manager, or a corporate executive (of a publicly traded company). Each of those _roles_ will likely present some similar features as well as some different features when compared to the other roles. So, how do you accomplish this in Streamlit? This is sometimes called Role-based Access Control, or **RBAC** for short.
+```bash
+docker compose up -d
+```
 
-The code in this project demonstrates how to implement a simple RBAC system in Streamlit but without actually using user authentication (usernames and passwords). The Streamlit pages from the original template repo are split up among 3 roles - Political Strategist, USAID Worker, and a System Administrator role (this is used for any sort of system tasks such as re-training ML model, etc.). It also demonstrates how to deploy an ML model.
+This single command:
+1. Builds the Streamlit app image and the Flask API image
+2. Starts the MySQL database and runs `sprouted-def.sql` to initialize the schema
+3. Waits for MySQL to be ready, then runs `seed.py` to populate the database
+4. Starts the Flask API server
+5. Starts the Streamlit frontend
 
-Wrapping your head around this will take a little time and exploration of this code base. Some highlights are below.
+### 4 — Open the Application
 
-### Getting Started with the RBAC
+| Service | URL |
+|---|---|
+| **Streamlit App** | http://localhost:8501 |
+| **Flask REST API** | http://localhost:4000 |
+| **MySQL** (external) | `localhost:3200` |
 
-1. We need to turn off the standard panel of links on the left side of the Streamlit app. This is done through the `app/src/.streamlit/config.toml` file. So check that out. We are turning it off so we can control directly what links are shown.
-1. Then I created a new python module in `app/src/modules/nav.py`. When you look at the file, you will see that there are functions for basically each page of the application. The `st.sidebar.page_link(...)` adds a single link to the sidebar. We have a separate function for each page so that we can organize the links/pages by role.
-1. Next, check out the `app/src/Home.py` file. Notice that there are 3 buttons added to the page and when one is clicked, it redirects via `st.switch_page(...)` to that Roles Home page in `app/src/pages`. But before the redirect, I set a few different variables in the Streamlit `session_state` object to track role, first name of the user, and that the user is now authenticated.
-1. Notice near the top of `app/src/Home.py` and all other pages, there is a call to `SideBarLinks(...)` from the `app/src/modules/nav.py` module. This is the function that will use the role set in `session_state` to determine what links to show the user in the sidebar.
-1. The pages are organized by Role. Pages that start with a `0` are related to the _Political Strategist_ role. Pages that start with a `1` are related to the _USAID worker_ role. And, pages that start with a `2` are related to The _System Administrator_ role.
+---
 
+## User Roles & Features
 
-## (Completely Optional) Incorporating ML Models into your Project
+Sprouted uses role-based access control. Select a persona from the home screen to enter the app.
 
-_Note_: This project only contains the infrastructure for a hypothetical ML model.
+### 🛠 Garden Admin — *Derek Washington*
+Manages the entire garden site.
+- **Dashboard** — Site overview, pending plot applications, upcoming workdays, water budget, open pest reports
+- **Plot Manager** — Assign/vacate plots, manage the waitlist queue
+- **Workdays Manager** — Schedule community workdays, add tasks, manage volunteer events
 
-1. Collect and preprocess necessary datasets for your ML models.
-1. Build, train, and test your ML model in a Jupyter Notebook.
-   - You can store your datasets in the `datasets` folder. You can also store your Jupyter Notebook in the `ml-src` folder.
-1. Once your team is happy with the model's performance, convert your Jupyter Notebook code for the ML model to a pure Python script.
-   - You can include the `training` and `testing` functionality as well as the `prediction` functionality.
-   - Develop and test this pure Python script first in the `ml-src` folder.
-   - You may or may not need to include data cleaning, though.
-1. Review the `api/backend/ml_models` module. In this folder,
-   - We've put a sample (read _fake_) ML model in the `model01.py` file. The `predict` function will be called by the Flask REST API to perform '_real-time_' prediction based on model parameter values that are stored in the database. **Important**: you would never want to hard code the model parameter weights directly in the prediction function.
-1. The prediction route for the REST API is in `api/backend/simple/simple_routes.py`. Basically, it accepts two URL parameters and passes them to the `prediction` function in the `ml_models` module. The `prediction` route/function packages up the value(s) it receives from the model's `predict` function and sends it back to Streamlit as JSON.
-1. Back in Streamlit, check out `app/src/pages/11_Prediction.py`. Here, two numeric input fields are created. When the button is pressed, it makes a request to the REST API at `/prediction/{var_01}/{var_02}` and passes the values from the two inputs as URL path parameters. It gets back the results from the route and displays them.
+### 🌿 Plot Owner — *Maria*
+Manages their individual garden plot.
+- **My Plot** — View plot details, crop schedules, and harvest history
+- **Log Activity** — Record plantings and harvests
+- **Report Pest** — Submit pest and disease reports
+- **List Surplus** — Post surplus produce for donation
+
+### 🙋 Volunteer — *Clark*
+Signs up for and logs community work.
+- **Open Tasks** — Browse and sign up for workday tasks
+- **My Hours** — View personal volunteer hour logs
+- **Event Detail** — See details for a specific workday event
+
+### 🏦 Food Bank Partner — *Lucia*
+Requests surplus produce for their organization.
+- **Dashboard** — Overview of available produce and recent activity
+- **Browse Surplus** — View all available surplus listings and submit requests
+- **My Requests** — Track the status of submitted produce requests
+
+---
+
+## Managing the Containers
+
+| Command | Description |
+|---|---|
+| `docker compose up -d` | Start all containers in the background |
+| `docker compose down` | Stop and remove all containers |
+| `docker compose down -v` | Stop containers **and delete all data volumes** |
+| `docker compose restart` | Restart all running containers |
+| `docker compose logs -f api` | Stream logs from the API container |
+| `docker compose logs -f app` | Stream logs from the Streamlit container |
+
+### Resetting the Database
+
+If you update `sprouted-def.sql` or `seed.py`, you must recreate the database container to apply changes:
+
+```bash
+docker compose down db -v && docker compose up -d
+```
+
+> The `-v` flag deletes the MySQL data volume so the schema and seed scripts run fresh on restart.
+
+---
+
+## Development Notes
+
+- **Hot reload** is enabled for both the Flask API and the Streamlit app. Save a file and changes apply immediately.
+- In the Streamlit browser tab, click **Always Rerun** when prompted to enable automatic refresh on code changes.
+- The database schema is defined in `database-files/sprouted-def.sql` and executed **automatically** when the MySQL container is first created.
+- Seed data is generated by `database-files/seed.py` using [Faker](https://faker.readthedocs.io/) and runs **automatically** each time the API container starts.
