@@ -5,6 +5,7 @@ from backend.db_connection import get_db
 
 pests_bp = Blueprint("pests", __name__)
 PEST_STATUSES = {"open", "in progress", "resolved"}
+PEST_SEVERITIES = {"low", "medium", "high", "critical"}
 
 
 @pests_bp.route("/pest-reports", methods=["GET"])
@@ -22,6 +23,52 @@ def get_pest_reports():
         return jsonify(cursor.fetchall()), 200
     except Error as e:
         current_app.logger.error(f"Error fetching pest reports: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+
+
+@pests_bp.route("/pest-reports", methods=["POST"])
+def create_pest_report():
+    """Submit a new pest or disease report from a plot owner."""
+    cursor = get_db().cursor()
+    try:
+        data = request.get_json() or {}
+        required = ["plot_id", "user_id", "description", "severity"]
+        missing = [field for field in required if field not in data]
+        if missing:
+            return (
+                jsonify({"error": f"Missing required fields: {', '.join(missing)}"}),
+                400,
+            )
+
+        severity = data["severity"]
+        if severity not in PEST_SEVERITIES:
+            valid = ", ".join(sorted(PEST_SEVERITIES))
+            return jsonify({"error": f"Invalid severity. Allowed: {valid}"}), 400
+
+        query = """
+            INSERT INTO Pest_Report (plot_id, crop_id, user_id, description,
+                                     severity, date_reported, status)
+            VALUES (%s, %s, %s, %s, %s, CURDATE(), 'open')
+        """
+        cursor.execute(
+            query,
+            (
+                data["plot_id"],
+                data.get("crop_id"),
+                data["user_id"],
+                data["description"],
+                severity,
+            ),
+        )
+        get_db().commit()
+        return (
+            jsonify({"message": "Pest report submitted", "report_id": cursor.lastrowid}),
+            201,
+        )
+    except Error as e:
+        current_app.logger.error(f"Error creating pest report: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
         cursor.close()

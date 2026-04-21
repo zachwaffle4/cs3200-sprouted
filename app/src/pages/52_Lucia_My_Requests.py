@@ -54,7 +54,6 @@ def cancel_request(request_id):
 
 st.set_page_config(page_title="My Requests – Sprouted", layout="wide")
 
-#SideBarLinks()
 SideBarLinks()
 
 st.markdown("""
