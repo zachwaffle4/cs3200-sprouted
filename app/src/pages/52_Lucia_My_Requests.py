@@ -1,16 +1,30 @@
 import streamlit as st
 import requests
-from modules.nav import SideBarLinks
+#from modules.nav import SideBarLinks
 
-API_BASE = "http://web-api:4000/api"
-
-#adding the requests 
+API_BASE = "http://web-api:4000"
 
 def get_my_requests(food_bank_id):
     try:
-        r = requests.get(f"{API_BASE}/food-banks/{food_bank_id}/requests")
+        r = requests.get(f"{API_BASE}/surplus")
         if r.status_code == 200:
-            return r.json()
+            listings = r.json()
+            result = []
+            for l in listings:
+                if l.get("status") in ("pending", "completed"):
+                    result.append({
+                        "id": l.get("listing_id", l.get("id")),
+                        "crop": f"Crop {l.get('crop_id', '?')}",
+                        "type": "Vegetable",
+                        "lbs": l.get("quantity_lbs", 0),
+                        "site": f"Site {l.get('site_id', '?')}",
+                        "plot": f"Plot {l.get('plot_id', '?')}",
+                        "preferred_date": str(l.get("listing_date", "")),
+                        "status": l.get("status", "Pending").capitalize(),
+                        "confirmed_date": None,
+                    })
+            if result:
+                return result
     except Exception:
         pass
     return [
@@ -40,7 +54,7 @@ def cancel_request(request_id):
 
 st.set_page_config(page_title="My Requests – Sprouted", layout="wide")
 
-SideBarLinks()
+#SideBarLinks()
 
 st.markdown("""
 <style>
@@ -122,7 +136,7 @@ for req in filtered:
                 else:
                     st.error("Could not cancel. Please try again.")
         elif req["status"] == "Confirmed":
-            st.button("View details", key=f"view_{req['id']}") 
+            st.button("View details", key=f"view_{req['id']}")
 
     st.divider()
 
