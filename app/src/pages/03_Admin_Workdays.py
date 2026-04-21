@@ -60,10 +60,10 @@ def fmt_date(d):
     try:
         return datetime.strptime(str(d)[:10], "%Y-%m-%d").strftime("%b %d, %Y")
     except Exception:
-        return str(d)
+        return str(d)[:16].strip(", ")
 
 
-# Fetch workdays and tasks for each from the API
+# Fetch workdays and their tasks
 workdays_raw = api_get("/workdays") or []
 existing_workdays = []
 for w in workdays_raw:
@@ -94,83 +94,16 @@ for w in workdays_raw:
 if "new_tasks" not in st.session_state:
     st.session_state["new_tasks"] = []
 
-if "expanded_workday" not in st.session_state:
-    st.session_state["expanded_workday"] = None
+if "expanded_workdays" not in st.session_state:
+    st.session_state["expanded_workdays"] = set()
 
-# Page Contents
+# Page content
 st.title("Workdays Manager")
 st.divider()
 
-st.subheader("Scheduled Workdays")
-st.caption(
-    "View, edit, or delete any upcoming community workdays that have been organized."
-)
-
-if not existing_workdays:
-    st.info("No upcoming workdays scheduled.")
-
-for wd in existing_workdays:
-    with st.container(border=True):
-        col_info, col_del = st.columns([9, 1])
-        with col_info:
-            st.write(f"**{wd['name']}** — {wd['date']}")
-            st.caption(wd["description"])
-            ratio = wd["signed_up"] / wd["needed"]
-            st.progress(
-                ratio, text=f"{wd['signed_up']}/{wd['needed']} volunteers signed up"
-            )
-        with col_del:
-            if st.button("🗑️", key=f"del_wd_{wd['id']}"):
-                res = api_delete(f"/workdays/{wd['id']}")
-                if res:
-                    st.toast(f"Deleted '{wd['name']}'.")
-                    st.rerun()
-                else:
-                    st.toast("Failed to delete workday.", icon="⚠️")
-
-        # Toggle task list
-        if st.session_state["expanded_workday"] == wd["id"]:
-            label = "Hide tasks ▲"
-        else:
-            label = "Show tasks ▼"
-
-        if st.button(label, key=f"toggle_{wd['id']}"):
-            st.session_state["expanded_workday"] = (
-                None if st.session_state["expanded_workday"] == wd["id"] else wd["id"]
-            )
-            st.rerun()
-
-        if st.session_state["expanded_workday"] == wd["id"]:
-            if wd["tasks"]:
-                h1, h2, h3, h4 = st.columns([4, 2, 2, 1])
-                h1.write("**Task**")
-                h2.write("**Urgency**")
-                h3.write("**Location**")
-                h4.write("**Del.**")
-                for task in wd["tasks"]:
-                    c1, c2, c3, c4 = st.columns([4, 2, 2, 1])
-                    c1.write(task["name"])
-                    c2.write(task["urgency"])
-                    c3.write(task["location"])
-                    if c4.button("🗑️", key=f"del_task_{task['id']}"):
-                        # Mark task completed via PUT — GET /tasks filters out completed tasks
-                        result = api_put(
-                            f"/workdays/{wd['id']}/tasks",
-                            {"task_id": task["id"], "status": "completed"},
-                        )
-                        if result:
-                            st.toast(f"Task '{task['name']}' removed.")
-                        else:
-                            st.toast("Failed to remove task.", icon="⚠️")
-                        st.rerun()
-            else:
-                st.caption("No tasks for this workday.")
-
-st.divider()
-
-# Scheduling a New Workday
+# ── Schedule a New Workday (with tasks) ──
 st.subheader("Schedule a New Community Workday")
-st.caption("Create a new workday event with tasks for volunteers.")
+st.caption("Create a new workday event. Optionally add tasks for volunteers below.")
 
 with st.form("new_workday_form"):
     event_name = st.text_input("Event Name")
@@ -182,6 +115,31 @@ with st.form("new_workday_form"):
     volunteers_needed = st.number_input(
         "Volunteers Needed", min_value=1, max_value=100, value=12
     )
+
+    st.markdown("**Tasks** *(optional — volunteers will sign up for these)*")
+    if st.session_state["new_tasks"]:
+        for i, task in enumerate(st.session_state["new_tasks"]):
+            tc1, tc2, tc3 = st.columns([4, 2, 2])
+            st.session_state["new_tasks"][i]["name"] = tc1.text_input(
+                "Task", value=task["name"], key=f"tname_{i}", label_visibility="collapsed",
+                placeholder="Task description",
+            )
+            st.session_state["new_tasks"][i]["urgency"] = tc2.selectbox(
+                "Urgency",
+                ["low", "medium", "high"],
+                index=["low", "medium", "high"].index(task.get("urgency", "low")),
+                key=f"turgency_{i}",
+                label_visibility="collapsed",
+            )
+            st.session_state["new_tasks"][i]["location"] = tc3.text_input(
+                "Location",
+                value=task.get("location", ""),
+                key=f"tloc_{i}",
+                label_visibility="collapsed",
+                placeholder="e.g. Bed A",
+            )
+    else:
+        st.caption("No tasks added yet. Use the '+ Add Task' button below after creating.")
 
     submitted = st.form_submit_button("Create Workday")
 
@@ -221,41 +179,79 @@ with st.form("new_workday_form"):
                     "Failed to create workday. Ensure all required fields are filled."
                 )
 
-# Dynamic task builder (must be outside st.form to allow st.rerun)
-st.write("**Tasks** *(volunteers will sign up for these)*")
+# Task add/remove buttons (outside form so rerun works)
+btn_col1, btn_col2, _ = st.columns([1, 1, 4])
+with btn_col1:
+    if st.button("+ Add Task"):
+        st.session_state["new_tasks"].append({"name": "", "urgency": "low", "location": ""})
+        st.rerun()
+with btn_col2:
+    if st.session_state["new_tasks"] and st.button("Remove Last Task"):
+        st.session_state["new_tasks"].pop()
+        st.rerun()
 
-if st.session_state["new_tasks"]:
-    h1, h2, h3, h4 = st.columns([4, 2, 2, 1])
-    h1.write("**Task**")
-    h2.write("**Urgency**")
-    h3.write("**Location**")
-    h4.write("**Del.**")
+st.divider()
 
-    for i, task in enumerate(st.session_state["new_tasks"]):
-        c1, c2, c3, c4 = st.columns([4, 2, 2, 1])
-        st.session_state["new_tasks"][i]["name"] = c1.text_input(
-            "Task", value=task["name"], key=f"tname_{i}", label_visibility="collapsed"
-        )
-        st.session_state["new_tasks"][i]["urgency"] = c2.selectbox(
-            "Urgency",
-            ["low", "medium", "high"],
-            index=["low", "medium", "high"].index(task.get("urgency", "low")),
-            key=f"turgency_{i}",
-            label_visibility="collapsed",
-        )
-        st.session_state["new_tasks"][i]["location"] = c3.text_input(
-            "Location",
-            value=task.get("location", ""),
-            key=f"tloc_{i}",
-            label_visibility="collapsed",
-            placeholder="e.g. Bed A",
-        )
-        if c4.button("🗑️", key=f"rm_task_{i}"):
-            st.session_state["new_tasks"].pop(i)
+# ── Scheduled Workdays ──
+st.subheader("Scheduled Workdays")
+st.caption(
+    "View, edit, or delete any upcoming community workdays."
+)
+
+if not existing_workdays:
+    st.info("No upcoming workdays scheduled.")
+
+for wd in existing_workdays:
+    with st.container(border=True):
+        col_info, col_del = st.columns([9, 1])
+        with col_info:
+            st.write(f"**{wd['name']}** — {wd['date']}")
+            st.caption(wd["description"])
+            ratio = wd["signed_up"] / wd["needed"]
+            st.progress(
+                ratio, text=f"{wd['signed_up']}/{wd['needed']} volunteers signed up"
+            )
+        with col_del:
+            if st.button("🗑️", key=f"del_wd_{wd['id']}"):
+                res = api_delete(f"/workdays/{wd['id']}")
+                if res:
+                    st.toast(f"Deleted '{wd['name']}'.")
+                    st.rerun()
+                else:
+                    st.toast("Failed to delete workday.", icon="⚠️")
+
+        # Toggle tasks
+        is_expanded = wd["id"] in st.session_state["expanded_workdays"]
+        label = "Hide tasks ▲" if is_expanded else f"Show tasks ▼ ({len(wd['tasks'])})"
+
+        if st.button(label, key=f"toggle_{wd['id']}"):
+            if is_expanded:
+                st.session_state["expanded_workdays"].discard(wd["id"])
+            else:
+                st.session_state["expanded_workdays"].add(wd["id"])
             st.rerun()
-else:
-    st.caption("No tasks yet.")
 
-if st.button("+ Add Task"):
-    st.session_state["new_tasks"].append({"name": "", "urgency": "low", "location": ""})
-    st.rerun()
+        if is_expanded:
+            if wd["tasks"]:
+                h1, h2, h3, h4 = st.columns([4, 2, 2, 1])
+                h1.write("**Task**")
+                h2.write("**Urgency**")
+                h3.write("**Location**")
+                h4.write("**Del.**")
+                for task in wd["tasks"]:
+                    c1, c2, c3, c4 = st.columns([4, 2, 2, 1])
+                    c1.write(task["name"])
+                    c2.write(task["urgency"])
+                    c3.write(task["location"])
+                    if c4.button("🗑️", key=f"del_task_{task['id']}"):
+                        result = api_put(
+                            f"/workdays/{wd['id']}/tasks",
+                            {"task_id": task["id"], "status": "completed"},
+                        )
+                        if result:
+                            st.toast(f"Task '{task['name']}' removed.")
+                        else:
+                            st.toast("Failed to remove task.", icon="⚠️")
+                        st.rerun()
+            else:
+                st.caption("No active tasks for this workday.")
