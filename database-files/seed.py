@@ -136,6 +136,23 @@ def seedCropData(cropData: List[tuple]) -> None:
     db.commit()
 
 
+personas = [
+    ("garden_admin", "derek.washington@sprouted.org", "Derek", "Washington"),
+    ("plot_owner", "maria.santos@sprouted.org", "Maria", "Santos"),
+    ("volunteer", "clark.kent@sprouted.org", "Clark", "Kent"),
+    ("food_bank_coordinator", "lucia.tran@sprouted.org", "Lucia", "Tran"),
+]
+
+
+def seedPersonas() -> None:
+    for role, email, first, last in personas:
+        MySQL.execute(
+            "INSERT INTO User (role, email, phone, first_name, last_name) VALUES (%s,%s,%s,%s,%s)",
+            (role, email, fake.phone_number()[:20], first, last),
+        )
+    db.commit()
+
+
 def seedUsers(numUser: int) -> None:
     for _ in range(numUser):
         MySQL.execute(
@@ -467,6 +484,7 @@ def main():
     print(MySQL)
     seedSites(numSites)
     seedCropData(cropData)
+    seedPersonas()
     seedUsers(numUser)
     seedOrgs(numOrgs)
     seedPlots(numPlots)
