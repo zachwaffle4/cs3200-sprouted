@@ -2,13 +2,15 @@ import logging
 import requests
 import streamlit as st
 from modules.nav import SideBarLinks
+
 logger = logging.getLogger(__name__)
 
-st.set_page_config(layout='wide')
+st.set_page_config(layout="wide")
 
 SideBarLinks()
 
 API_BASE = "http://api:4000"
+
 
 def get_workdays():
     try:
@@ -17,33 +19,38 @@ def get_workdays():
             workdays = r.json()
             # Transform API response to match frontend expectations if necessary
             for wd in workdays:
-                wd['id'] = wd.get('workday_id')
-                wd['title'] = wd.get('event_name')
-                wd['date'] = wd.get('event_date')
-                wd['time'] = "" # Backend doesn't return time in this format yet
-                wd['location'] = f"Site {wd.get('site_id')}" # Site name needs another join or lookup
-                wd['signed_up'] = wd.get('signup_count', 0)
-                wd['capacity'] = wd.get('volunteers_needed', 0)
-                wd['needs_help'] = wd.get('spots_remaining', 0) > 0
-                
+                wd["id"] = wd.get("workday_id")
+                wd["title"] = wd.get("event_name")
+                wd["date"] = wd.get("event_date")
+                wd["time"] = ""  # Backend doesn't return time in this format yet
+                wd["location"] = (
+                    f"Site {wd.get('site_id')}"  # Site name needs another join or lookup
+                )
+                wd["signed_up"] = wd.get("signup_count", 0)
+                wd["capacity"] = wd.get("volunteers_needed", 0)
+                wd["needs_help"] = wd.get("spots_remaining", 0) > 0
+
                 # Fetch tasks for each workday
                 tasks_r = requests.get(f"{API_BASE}/workdays/{wd['id']}/tasks")
                 if tasks_r.status_code == 200:
-                    wd['tasks'] = []
+                    wd["tasks"] = []
                     for t in tasks_r.json():
-                        wd['tasks'].append({
-                            "id": t['task_id'],
-                            "name": t['task_description'],
-                            "hours": 2.0, # Defaulting hours since it's not in DB
-                            "spots_left": 1 if t['status'] == 'pending' else 0,
-                            "full": t['status'] != 'pending'
-                        })
+                        wd["tasks"].append(
+                            {
+                                "id": t["task_id"],
+                                "name": t["task_description"],
+                                "hours": 2.0,  # Defaulting hours since it's not in DB
+                                "spots_left": 1 if t["status"] == "pending" else 0,
+                                "full": t["status"] != "pending",
+                            }
+                        )
                 else:
-                    wd['tasks'] = []
+                    wd["tasks"] = []
             return workdays
     except Exception as e:
         logger.error(f"Error fetching workdays: {e}")
     return []
+
 
 def signup_for_task(workday_id, task_id, volunteer_id):
     try:
@@ -58,6 +65,7 @@ def signup_for_task(workday_id, task_id, volunteer_id):
         logger.error(f"Error signing up: {e}")
         return False
 
+
 def cancel_signup(signup_id):
     try:
         r = requests.delete(f"{API_BASE}/signups/{signup_id}")
@@ -65,9 +73,11 @@ def cancel_signup(signup_id):
     except Exception:
         return False
 
+
 st.set_page_config(page_title="Open Tasks – Sprouted", layout="wide")
 
-st.markdown("""
+st.markdown(
+    """
 <style>
     .needs-help-badge {
         background: #fcebeb; color: #a32d2d;
@@ -86,7 +96,9 @@ st.markdown("""
         align-items: center;
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 user = st.session_state.get("user", {"id": 3, "name": "Clark Kent"})
 volunteer_id = user.get("id", 3)
@@ -96,9 +108,15 @@ st.caption(f"Logged in as {user.get('name', 'Clark Kent')}")
 
 col_f1, col_f2 = st.columns([2, 2])
 with col_f1:
-    date_filter = st.selectbox("Date", ["All Dates", "This Weekend", "This Week", "This Month"], label_visibility="collapsed")
+    date_filter = st.selectbox(
+        "Date",
+        ["All Dates", "This Weekend", "This Week", "This Month"],
+        label_visibility="collapsed",
+    )
 with col_f2:
-    urgency_filter = st.selectbox("Urgency", ["All", "Needs Help Only"], label_visibility="collapsed")
+    urgency_filter = st.selectbox(
+        "Urgency", ["All", "Needs Help Only"], label_visibility="collapsed"
+    )
 
 st.markdown("---")
 
@@ -114,14 +132,19 @@ signed_up_tasks = st.session_state.get("signed_up_tasks", set())
 
 for wd in workdays:
     pct = wd["signed_up"] / wd["capacity"] if wd["capacity"] else 0
-    needs_help_html = '<span class="needs-help-badge">Needs Help</span>' if wd["needs_help"] else ""
+    needs_help_html = (
+        '<span class="needs-help-badge">Needs Help</span>' if wd["needs_help"] else ""
+    )
 
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div style='margin-bottom:0.25rem'>
         <strong style='font-size:1.05rem'>{wd['title']}</strong>{needs_help_html}
         &nbsp;&nbsp;<span style='color:#666;font-size:0.85rem'>{wd['date']} {wd['time']} &nbsp;·&nbsp; {wd['location']}</span>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     st.progress(pct, text=f"{wd['signed_up']}/{wd['capacity']} Signed Up")
 
@@ -155,13 +178,15 @@ for wd in workdays:
                     signed_up_tasks.add(task_key)
                     st.session_state["signed_up_tasks"] = signed_up_tasks
                     upcoming = st.session_state.get("upcoming_signups", [])
-                    upcoming.append({
-                        "signup_id": task["id"] * 100,
-                        "date": f"{wd['date']} {wd['time']}",
-                        "task": task["name"],
-                        "location": wd["location"],
-                        "hours": task["hours"],
-                    })
+                    upcoming.append(
+                        {
+                            "signup_id": task["id"] * 100,
+                            "date": f"{wd['date']} {wd['time']}",
+                            "task": task["name"],
+                            "location": wd["location"],
+                            "hours": task["hours"],
+                        }
+                    )
                     st.session_state["upcoming_signups"] = upcoming
                     st.success(f"Signed up for '{task['name']}'!")
                     st.rerun()
@@ -171,7 +196,8 @@ for wd in workdays:
     st.markdown("")
 
     my_tasks_here = [
-        s for s in st.session_state.get("upcoming_signups", [])
+        s
+        for s in st.session_state.get("upcoming_signups", [])
         if s.get("location") == wd["location"] and wd["date"] in s.get("date", "")
     ]
     if my_tasks_here:
@@ -184,7 +210,8 @@ for wd in workdays:
                 ok = cancel_signup(su["signup_id"])
                 if ok:
                     st.session_state["upcoming_signups"] = [
-                        s for s in st.session_state["upcoming_signups"]
+                        s
+                        for s in st.session_state["upcoming_signups"]
                         if s["signup_id"] != su["signup_id"]
                     ]
                     signed_up_tasks.discard(f"{wd['id']}_{su['signup_id'] // 100}")
@@ -199,7 +226,8 @@ for wd in workdays:
 total_hrs = 30.0
 goal_hrs = 60.0
 remaining = goal_hrs - total_hrs
-st.markdown(f"""
+st.markdown(
+    f"""
 <div class="hours-bar">
     <div>
         <strong>My hours this semester</strong> &nbsp;
@@ -207,4 +235,6 @@ st.markdown(f"""
     </div>
     <div style='color:#5a7a5a; font-size:0.85rem'>{remaining:.0f} hours remaining to {goal_hrs:.0f}-hr goal</div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)

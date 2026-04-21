@@ -2,13 +2,15 @@ import logging
 import requests
 import streamlit as st
 from modules.nav import SideBarLinks
+
 logger = logging.getLogger(__name__)
 
-st.set_page_config(layout='wide')
+st.set_page_config(layout="wide")
 
 SideBarLinks()
 
 API_BASE = "http://api:4000"
+
 
 def get_workday_tasks(workday_id):
     try:
@@ -57,6 +59,7 @@ def get_workday_tasks(workday_id):
         ],
     }
 
+
 def signup_for_task(workday_id, task_id, volunteer_id):
     try:
         r = requests.post(
@@ -67,9 +70,11 @@ def signup_for_task(workday_id, task_id, volunteer_id):
     except Exception:
         return False
 
+
 st.set_page_config(page_title="Event Detail – Sprouted", layout="wide")
 
-st.markdown("""
+st.markdown(
+    """
 <style>
     .urgent-flag { color: #a32d2d; font-size: 0.78rem; font-weight: 500; }
     .task-desc { color: #555; font-size: 0.85rem; margin-top: 2px; }
@@ -96,7 +101,9 @@ st.markdown("""
         align-items: center;
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 user = st.session_state.get("user", {"id": 3, "name": "Clark Kent"})
 volunteer_id = user.get("id", 3)
@@ -121,7 +128,8 @@ st.markdown("")
 pct = wd["signed_up"] / wd["capacity"] if wd["capacity"] else 0
 st.progress(pct, text=f"{wd['signed_up']} / {wd['capacity']} signed up")
 
-st.markdown(f"""
+st.markdown(
+    f"""
 <div style="
     background:#f0f4f0; border:1px solid #c8d8c8; border-radius:8px;
     height:80px; display:flex; align-items:center; justify-content:center;
@@ -129,7 +137,9 @@ st.markdown(f"""
 ">
     📍 Map — {wd['location']}
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 st.markdown("### Available Tasks")
 st.caption("Sign up for one or more tasks. Urgent tasks are short on volunteers.")
@@ -150,12 +160,24 @@ for task in wd.get("tasks", []):
     with c1:
         st.markdown(f"**{task['name']}**")
         if task["urgent"]:
-            st.markdown(f'<span class="urgent-flag">● Urgent — only {task["spots_left"]} left</span>', unsafe_allow_html=True)
+            st.markdown(
+                f'<span class="urgent-flag">● Urgent — only {task["spots_left"]} left</span>',
+                unsafe_allow_html=True,
+            )
         elif task["full"]:
-            st.markdown('<span style="color:#999;font-size:0.78rem">Full</span>', unsafe_allow_html=True)
+            st.markdown(
+                '<span style="color:#999;font-size:0.78rem">Full</span>',
+                unsafe_allow_html=True,
+            )
         else:
-            st.markdown(f'<span style="color:#555;font-size:0.78rem">{task["spots_left"]} spots remaining</span>', unsafe_allow_html=True)
-        st.markdown(f'<div class="task-desc">{task["description"]}</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<span style="color:#555;font-size:0.78rem">{task["spots_left"]} spots remaining</span>',
+                unsafe_allow_html=True,
+            )
+        st.markdown(
+            f'<div class="task-desc">{task["description"]}</div>',
+            unsafe_allow_html=True,
+        )
 
     c2.write(f"{task['hours']:.1f} hrs")
     c3.write("Full" if task["full"] else str(task["spots_left"]))
@@ -164,7 +186,9 @@ for task in wd.get("tasks", []):
         if task["full"]:
             st.button("Full", key=f"det_full_{task_key}", disabled=True)
         elif task_key in signed_up_tasks:
-            st.markdown('<span class="signed-badge">Signed Up ✓</span>', unsafe_allow_html=True)
+            st.markdown(
+                '<span class="signed-badge">Signed Up ✓</span>', unsafe_allow_html=True
+            )
         else:
             if st.button("Sign Up", key=f"det_signup_{task_key}"):
                 ok = signup_for_task(wd["id"], task["id"], volunteer_id)
@@ -172,15 +196,19 @@ for task in wd.get("tasks", []):
                     signed_up_tasks.add(task_key)
                     st.session_state["signed_up_tasks"] = signed_up_tasks
                     upcoming = st.session_state.get("upcoming_signups", [])
-                    upcoming.append({
-                        "signup_id": task["id"] * 100,
-                        "date": f"{wd['date']} {wd['time']}",
-                        "task": task["name"],
-                        "location": wd["location"],
-                        "hours": task["hours"],
-                    })
+                    upcoming.append(
+                        {
+                            "signup_id": task["id"] * 100,
+                            "date": f"{wd['date']} {wd['time']}",
+                            "task": task["name"],
+                            "location": wd["location"],
+                            "hours": task["hours"],
+                        }
+                    )
                     st.session_state["upcoming_signups"] = upcoming
-                    st.success(f"You're signed up for '{task['name']}'! It'll be logged after the event.")
+                    st.success(
+                        f"You're signed up for '{task['name']}'! It'll be logged after the event."
+                    )
                     st.rerun()
                 else:
                     st.error("Sign-up failed. Please try again.")
@@ -192,14 +220,14 @@ goal_hrs = 60.0
 remaining = goal_hrs - total_hrs
 
 my_signed_up_hrs = sum(
-    t["hours"] for t in wd["tasks"]
-    if f"{wd['id']}_{t['id']}" in signed_up_tasks
+    t["hours"] for t in wd["tasks"] if f"{wd['id']}_{t['id']}" in signed_up_tasks
 )
 note = ""
 if my_signed_up_hrs > 0:
     note = f" &nbsp;·&nbsp; <span style='color:#085041'>{my_signed_up_hrs:.1f} hrs pending from this event</span>"
 
-st.markdown(f"""
+st.markdown(
+    f"""
 <div class="hours-bar">
     <div>
         <strong>My hours this semester</strong> &nbsp;
@@ -207,4 +235,6 @@ st.markdown(f"""
     </div>
     <div style='color:#5a7a5a; font-size:0.85rem'>{remaining:.0f} remaining to {goal_hrs:.0f}-hr goal</div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)

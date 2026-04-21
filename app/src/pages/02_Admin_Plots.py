@@ -4,10 +4,11 @@ import streamlit as st
 from modules.nav import SideBarLinks
 
 logger = logging.getLogger(__name__)
-st.set_page_config(layout='wide')
+st.set_page_config(layout="wide")
 SideBarLinks()
 
 API_BASE = "http://api:4000"
+
 
 # API helper functions
 def api_get(path, params=None):
@@ -20,6 +21,7 @@ def api_get(path, params=None):
         logger.error("GET %s failed: %s", path, e)
         return None
 
+
 def api_post(path, payload):
     try:
         url = f"{API_BASE}{path}"
@@ -30,6 +32,7 @@ def api_post(path, payload):
         logger.error("POST %s failed: %s", path, e)
         return None
 
+
 def api_put(path, payload):
     try:
         url = f"{API_BASE}{path}"
@@ -39,6 +42,7 @@ def api_put(path, payload):
     except Exception as e:
         logger.error("PUT %s failed: %s", path, e)
         return None
+
 
 def api_delete(path):
     try:
@@ -62,14 +66,20 @@ for p in plots_raw:
     if p["plot_id"] in seen_plot_ids:
         continue
     seen_plot_ids.add(p["plot_id"])
-    all_plots.append({
-        "id": p["plot_id"],
-        "plot_label": p.get("plot_name", f"Plot {p['plot_id']}"),
-        "status": STATUS_DISPLAY.get(p.get("occupancy_status", ""), p.get("occupancy_status", "Unknown")),
-        "owner": f"User {p['assigned_user_id']}" if p.get("assigned_user_id") else "—",
-        "owner_id": p.get("assigned_user_id"),
-        "assignment_id": p.get("active_assignment_id"),
-    })
+    all_plots.append(
+        {
+            "id": p["plot_id"],
+            "plot_label": p.get("plot_name", f"Plot {p['plot_id']}"),
+            "status": STATUS_DISPLAY.get(
+                p.get("occupancy_status", ""), p.get("occupancy_status", "Unknown")
+            ),
+            "owner": (
+                f"User {p['assigned_user_id']}" if p.get("assigned_user_id") else "—"
+            ),
+            "owner_id": p.get("assigned_user_id"),
+            "assignment_id": p.get("active_assignment_id"),
+        }
+    )
 
 # Waitlist from GET /waitlist
 waitlist_raw = api_get("/waitlist") or []
@@ -91,11 +101,11 @@ st.divider()
 
 # Filter bar — "Active" matches occupancy_status 'assigned', "Vacant" matches 'vacant'
 status_filter = st.radio(
-    "Filter by Status",
-    ["All", "Active", "Vacant"],
-    horizontal=True
+    "Filter by Status", ["All", "Active", "Vacant"], horizontal=True
 )
-filtered = [p for p in all_plots if status_filter == "All" or p["status"] == status_filter]
+filtered = [
+    p for p in all_plots if status_filter == "All" or p["status"] == status_filter
+]
 st.caption(f"Showing {len(filtered)} of {len(all_plots)} plots")
 
 # Plots table
@@ -140,13 +150,16 @@ if st.session_state["editing_plot"] is not None:
                 if existing_assignment:
                     api_delete(f"/assignments/{existing_assignment}")
                 result = api_post(
-                    f"/plots/{plot['id']}/assignments",
-                    {"user_id": int(new_owner_id)}
+                    f"/plots/{plot['id']}/assignments", {"user_id": int(new_owner_id)}
                 )
                 if result:
-                    st.toast(f"Plot {plot['plot_label']} assigned to User {new_owner_id}!")
+                    st.toast(
+                        f"Plot {plot['plot_label']} assigned to User {new_owner_id}!"
+                    )
                 else:
-                    st.toast("Failed to assign. Check that the User ID is valid.", icon="⚠️")
+                    st.toast(
+                        "Failed to assign. Check that the User ID is valid.", icon="⚠️"
+                    )
             elif existing_assignment:
                 result = api_delete(f"/assignments/{existing_assignment}")
                 if result:
@@ -181,5 +194,7 @@ for entry in waitlist_queue:
             if res:
                 st.toast(f"Promoted {entry['member']} to plot owner!")
             else:
-                st.toast("Promotion failed. No vacant plot may be available.", icon="⚠️")
+                st.toast(
+                    "Promotion failed. No vacant plot may be available.", icon="⚠️"
+                )
             st.rerun()

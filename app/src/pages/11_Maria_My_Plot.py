@@ -4,11 +4,12 @@ import streamlit as st
 from modules.nav import SideBarLinks
 
 logger = logging.getLogger(__name__)
-st.set_page_config(layout='wide')
+st.set_page_config(layout="wide")
 SideBarLinks()
 
 API_BASE = "http://api:4000"
 MARIA_USER_ID = 5
+
 
 # helper functions for API calls
 def api_get(path, params=None):
@@ -36,7 +37,9 @@ st.caption(f"Logged in as {st.session_state.get('first_name', 'Maria')} Santos")
 # Section 1: Season metrics
 st.write("## Season Summary")
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Total Yield", f"{float(totals.get('total_yield_lbs') or 0):.1f} lbs", border=True)
+c1.metric(
+    "Total Yield", f"{float(totals.get('total_yield_lbs') or 0):.1f} lbs", border=True
+)
 c2.metric("Active Plantings", int(totals.get("active_plantings") or 0), border=True)
 c3.metric("Harvests Recorded", int(totals.get("harvests_recorded") or 0), border=True)
 c4.metric("Distinct Crops", int(totals.get("distinct_crops") or 0), border=True)

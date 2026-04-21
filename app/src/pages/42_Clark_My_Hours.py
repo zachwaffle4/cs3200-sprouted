@@ -3,38 +3,45 @@ import requests
 import streamlit as st
 from datetime import datetime, date
 from modules.nav import SideBarLinks
+
 logger = logging.getLogger(__name__)
 
-st.set_page_config(layout='wide')
+st.set_page_config(layout="wide")
 
 SideBarLinks()
 
 API_BASE = "http://api:4000"
+
 
 def get_volunteer_log(volunteer_id):
     try:
         r = requests.get(f"{API_BASE}/volunteers/{volunteer_id}/log")
         if r.status_code == 200:
             entries = r.json()
-            total_hours = sum(e.get('hours_logged', 0) for e in entries)
+            total_hours = sum(e.get("hours_logged", 0) for e in entries)
             # Transform to match frontend expectations
             formatted_entries = []
             for e in entries:
-                formatted_entries.append({
-                    "id": e.get('log_id'),
-                    "date": e.get('work_date'),
-                    "event_task": e.get('task_description') or e.get('event_name') or "General Work",
-                    "hours": float(e.get('hours_logged', 0)),
-                    "status": "Verified" # Defaulting since status isn't in Volunteer_Log
-                })
+                formatted_entries.append(
+                    {
+                        "id": e.get("log_id"),
+                        "date": e.get("work_date"),
+                        "event_task": e.get("task_description")
+                        or e.get("event_name")
+                        or "General Work",
+                        "hours": float(e.get("hours_logged", 0)),
+                        "status": "Verified",  # Defaulting since status isn't in Volunteer_Log
+                    }
+                )
             return {
                 "total_hours": float(total_hours),
                 "goal_hours": 60.0,
-                "entries": formatted_entries
+                "entries": formatted_entries,
             }
     except Exception as e:
         logger.error(f"Error fetching volunteer log: {e}")
     return {"total_hours": 0.0, "goal_hours": 60.0, "entries": []}
+
 
 def log_hours(volunteer_id, payload):
     try:
@@ -43,13 +50,18 @@ def log_hours(volunteer_id, payload):
             "work_date": payload.get("date"),
             "hours_logged": payload.get("hours"),
             "notes": payload.get("notes"),
-            "task_id": payload.get("task_id")
+            "task_id": payload.get("task_id"),
         }
-        r = requests.post(f"{API_BASE}/volunteers/{volunteer_id}/log", json=backend_payload)
-        return r.status_code in (200, 201), r.json() if r.status_code in (200, 201) else {}
+        r = requests.post(
+            f"{API_BASE}/volunteers/{volunteer_id}/log", json=backend_payload
+        )
+        return r.status_code in (200, 201), (
+            r.json() if r.status_code in (200, 201) else {}
+        )
     except Exception as e:
         logger.error(f"Error logging hours: {e}")
         return False, {}
+
 
 def cancel_signup(signup_id):
     try:
@@ -58,9 +70,11 @@ def cancel_signup(signup_id):
     except Exception:
         return False
 
+
 st.set_page_config(page_title="My Volunteer Hours – Sprouted", layout="wide")
 
-st.markdown("""
+st.markdown(
+    """
 <style>
     .metric-box {
         background: #f0f7f0;
@@ -80,7 +94,9 @@ st.markdown("""
         border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; font-weight: 500;
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 user = st.session_state.get("user", {"id": 3, "name": "Clark Kent"})
 volunteer_id = user.get("id", 3)
@@ -96,27 +112,38 @@ entries = data.get("entries", [])
 
 c1, c2, c3 = st.columns(3)
 with c1:
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="metric-box">
         <div class="metric-label">Total Hours</div>
         <div class="metric-value">{total:.1f} hrs</div>
-    </div>""", unsafe_allow_html=True)
+    </div>""",
+        unsafe_allow_html=True,
+    )
 with c2:
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="metric-box">
         <div class="metric-label">Goal Hours</div>
         <div class="metric-value">{goal:.0f} hrs</div>
-    </div>""", unsafe_allow_html=True)
+    </div>""",
+        unsafe_allow_html=True,
+    )
 with c3:
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="metric-box">
         <div class="metric-label">Remaining</div>
         <div class="metric-value">{remaining:.1f} hrs</div>
-    </div>""", unsafe_allow_html=True)
+    </div>""",
+        unsafe_allow_html=True,
+    )
 
 st.markdown("")
 progress_pct = min(total / goal, 1.0) if goal > 0 else 0
-st.progress(progress_pct, text=f"{total:.0f} / {goal:.0f} hours toward your {goal:.0f}-hr goal")
+st.progress(
+    progress_pct, text=f"{total:.0f} / {goal:.0f} hours toward your {goal:.0f}-hr goal"
+)
 
 st.divider()
 
@@ -127,7 +154,9 @@ with st.expander("➕ Add Hours", expanded=False):
             log_date = st.date_input("Date of activity", value=date.today())
             task_name = st.text_input("Event / Task name")
         with col_b:
-            hours_logged = st.number_input("Hours worked", min_value=0.5, max_value=12.0, step=0.5, value=2.0)
+            hours_logged = st.number_input(
+                "Hours worked", min_value=0.5, max_value=12.0, step=0.5, value=2.0
+            )
             notes = st.text_area("Notes (optional)", height=80)
         submitted = st.form_submit_button("Log Hours")
         if submitted:
@@ -142,7 +171,9 @@ with st.expander("➕ Add Hours", expanded=False):
                 }
                 ok, resp = log_hours(volunteer_id, payload)
                 if ok:
-                    st.success(f"Logged {hours_logged:.1f} hrs for '{task_name}'. Status: Pending verification.")
+                    st.success(
+                        f"Logged {hours_logged:.1f} hrs for '{task_name}'. Status: Pending verification."
+                    )
                     st.rerun()
                 else:
                     st.error("Could not log hours right now. Please try again.")
@@ -153,7 +184,13 @@ col_head, col_filter = st.columns([3, 2])
 with col_head:
     st.subheader("Activity Log")
 with col_filter:
-    time_filter = st.radio("Show", ["All Time", "This Semester"], horizontal=True, label_visibility="collapsed")
+    time_filter = st.radio(
+        "Show",
+        ["All Time", "This Semester"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+
 
 def in_semester(entry_date_str):
     try:
@@ -162,7 +199,12 @@ def in_semester(entry_date_str):
     except Exception:
         return True
 
-filtered = entries if time_filter == "All Time" else [e for e in entries if in_semester(e.get("date", ""))]
+
+filtered = (
+    entries
+    if time_filter == "All Time"
+    else [e for e in entries if in_semester(e.get("date", ""))]
+)
 
 if not filtered:
     st.info("No activity logged yet for this period.")
@@ -188,9 +230,18 @@ else:
 st.divider()
 
 st.subheader("My Upcoming Sign-ups")
-upcoming = st.session_state.get("upcoming_signups", [
-    {"signup_id": 101, "date": "Nov 10, 2026 9:00 AM", "task": "Drip Line Inspection", "location": "Elm Street Garden", "hours": 2.0},
-])
+upcoming = st.session_state.get(
+    "upcoming_signups",
+    [
+        {
+            "signup_id": 101,
+            "date": "Nov 10, 2026 9:00 AM",
+            "task": "Drip Line Inspection",
+            "location": "Elm Street Garden",
+            "hours": 2.0,
+        },
+    ],
+)
 
 if not upcoming:
     st.info("No upcoming sign-ups.")
