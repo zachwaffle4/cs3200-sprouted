@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from modules.nav import SideBarLinks
  
-API_BASE = "http://localhost:4001/api"
+API_BASE = "http://web-api:4000"
  
 def get_dashboard_data(food_bank_id, season="2026", compare_to="2025"):
     try:

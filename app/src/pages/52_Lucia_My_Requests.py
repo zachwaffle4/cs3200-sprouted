@@ -2,7 +2,9 @@ import streamlit as st
 import requests
 from modules.nav import SideBarLinks
 
-API_BASE = "http://localhost:4001/api"
+API_BASE = "http://web-api:4000/api"
+
+#adding the requests 
 
 def get_my_requests(food_bank_id):
     try:
