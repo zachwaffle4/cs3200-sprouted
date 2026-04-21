@@ -2,48 +2,62 @@ import streamlit as st
 import requests as req
 from modules.nav import SideBarLinks
 
-API_BASE = "http://localhost:4001/api"
+API_BASE = "http://api:4000"
 
 def get_surplus_listings(crop_type=None, garden_site=None, min_qty=None):
     try:
         params = {}
         if crop_type and crop_type != "All types":
             params["crop_type"] = crop_type
-        if garden_site and garden_site != "All sites":
-            params["garden_site"] = garden_site
+        # Backend uses 'min_quantity' instead of 'min_qty'
         if min_qty:
-            params["min_qty"] = min_qty
+            params["min_quantity"] = min_qty
+        if garden_site and garden_site != "All sites":
+            params["site_name"] = garden_site
+        
         r = req.get(f"{API_BASE}/surplus", params=params)
         if r.status_code == 200:
-            return r.json()
-    except Exception:
-        pass
-    return [
-        {"id": 1, "crop": "Roma tomatoes", "type": "Vegetable", "lbs": 12,
-         "site": "Elm Street Garden", "plot": "Plot 14", "owner": "Maria S.", "date": "Mar 24", "status": "available"},
-        {"id": 2, "crop": "Sweet basil", "type": "Herb", "lbs": 3,
-         "site": "Riverside Plots", "plot": "Plot 3", "owner": "James K.", "date": "Mar 23", "status": "available"},
-        {"id": 3, "crop": "Zucchini", "type": "Vegetable", "lbs": 8,
-         "site": "MLK Community Farm", "plot": "Plot 7", "owner": "Diane P.", "date": "Mar 22", "status": "available"},
-        {"id": 4, "crop": "Jalapeño peppers", "type": "Vegetable", "lbs": 5,
-         "site": "Elm Street Garden", "plot": "Plot 22", "owner": "Carlos M.", "date": "Mar 25", "status": "available"},
-        {"id": 5, "crop": "Collard greens", "type": "Vegetable", "lbs": 6,
-         "site": "Riverside Plots", "plot": "Plot 11", "owner": "Aisha T.", "date": "Mar 20", "status": "pending"},
-    ]
+            listings = r.json()
+            # Transform to match frontend expectations
+            formatted = []
+            for l in listings:
+                formatted.append({
+                    "id": l.get('listing_id'),
+                    "crop": l.get('crop_name'),
+                    "type": l.get('crop_type'),
+                    "lbs": l.get('quantity_lbs'),
+                    "site": l.get('site_name'),
+                    "plot": f"Plot {l.get('plot_id')}",
+                    "owner": "Owner", # Backend doesn't return owner name here
+                    "date": l.get('listed_date'),
+                    "status": l.get('status')
+                })
+            return formatted
+    except Exception as e:
+        st.error(f"Error fetching surplus: {e}")
+    return []
 
 def request_pickup(surplus_id, food_bank_id, preferred_date):
     try:
-        r = req.post(f"{API_BASE}/surplus/{surplus_id}/requests",
-                     json={"food_bank_id": food_bank_id, "preferred_date": preferred_date})
+        # Backend expects org_id, listing_id, preferred_pickup_date
+        payload = {
+            "org_id": food_bank_id,
+            "listing_id": surplus_id,
+            "preferred_pickup_date": preferred_date
+        }
+        r = req.post(f"{API_BASE}/surplus/requests", json=payload)
         return r.status_code in (200, 201)
-    except Exception:
+    except Exception as e:
+        st.error(f"Error requesting pickup: {e}")
         return False
 
-def cancel_request(surplus_id):
+def cancel_request(request_id):
     try:
-        r = req.delete(f"{API_BASE}/surplus/{surplus_id}/requests")
+        # Backend expects request_id in path
+        r = req.delete(f"{API_BASE}/surplus/requests/{request_id}")
         return r.status_code in (200, 204)
-    except Exception:
+    except Exception as e:
+        st.error(f"Error cancelling request: {e}")
         return False
 
 st.set_page_config(page_title="Browse Surplus – Sprouted", layout="wide")
@@ -98,6 +112,8 @@ listings = get_surplus_listings(crop_type, garden_site, min_qty if min_qty > 0 e
 
 if search:
     listings = [l for l in listings if search.lower() in l["crop"].lower()]
+if garden_site and garden_site != "All sites":
+    listings = [l for l in listings if l["site"] == garden_site]
 
 st.caption(f"Showing {len(listings)} available listings")
 

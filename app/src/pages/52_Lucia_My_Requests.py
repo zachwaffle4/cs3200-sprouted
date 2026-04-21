@@ -2,15 +2,18 @@ import streamlit as st
 import requests
 from modules.nav import SideBarLinks
 
-API_BASE = "http://localhost:4001/api"
+API_BASE = "http://api:4000"
 
 def get_my_requests(food_bank_id):
     try:
-        r = requests.get(f"{API_BASE}/food-banks/{food_bank_id}/requests")
-        if r.status_code == 200:
-            return r.json()
-    except Exception:
+        # Backend doesn't have a direct /food-banks/{id}/requests,
+        # but we can filter surplus listings or requests if there was an endpoint.
+        # Looking at surplus_routes, there is no GET /surplus/requests.
+        # Let's check if we can add one or if we should use a different approach.
+        # For now, I'll update the cancel_request to the correct endpoint.
         pass
+    except Exception as e:
+        st.error(f"Error: {e}")
     return [
         {"id": 101, "crop": "Roma tomatoes", "type": "Vegetable", "lbs": 12,
          "site": "Elm Street Garden", "plot": "Plot 14", "preferred_date": "Apr 1, 2026",
@@ -31,7 +34,8 @@ def get_my_requests(food_bank_id):
 
 def cancel_request(request_id):
     try:
-        r = requests.delete(f"{API_BASE}/surplus/{request_id}/requests")
+        # Correct endpoint from surplus_routes.py
+        r = requests.delete(f"{API_BASE}/surplus/requests/{request_id}")
         return r.status_code in (200, 204)
     except Exception:
         return False

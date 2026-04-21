@@ -8,55 +8,54 @@ st.set_page_config(layout='wide')
 
 SideBarLinks()
 
-API_BASE = "http://localhost:4001/api"
+API_BASE = "http://api:4000"
 
 def get_workdays():
     try:
         r = requests.get(f"{API_BASE}/workdays")
         if r.status_code == 200:
-            return r.json()
-    except Exception:
-        pass
-    return [
-        {
-            "id": 1,
-            "title": "Fall Cleanup",
-            "date": "Nov 1, 2026",
-            "time": "9:00 AM",
-            "location": "Elm Street Garden",
-            "signed_up": 8,
-            "capacity": 12,
-            "needs_help": False,
-            "tasks": [
-                {"id": 10, "name": "Bed Weeding", "hours": 2.0, "spots_left": 1, "full": False},
-                {"id": 11, "name": "Compost Turning", "hours": 2.0, "spots_left": 0, "full": True},
-                {"id": 12, "name": "Path Raking", "hours": 1.5, "spots_left": 3, "full": False},
-            ],
-        },
-        {
-            "id": 2,
-            "title": "Fall Greenhouse Prep",
-            "date": "Nov 10, 2026",
-            "time": "9:00 AM",
-            "location": "Elm Street Garden",
-            "signed_up": 3,
-            "capacity": 12,
-            "needs_help": True,
-            "tasks": [
-                {"id": 20, "name": "Winter Seedling Potting", "hours": 2.0, "spots_left": 4, "full": False},
-                {"id": 21, "name": "Drip Line Inspection", "hours": 2.0, "spots_left": 4, "full": False},
-            ],
-        },
-    ]
+            workdays = r.json()
+            # Transform API response to match frontend expectations if necessary
+            for wd in workdays:
+                wd['id'] = wd.get('workday_id')
+                wd['title'] = wd.get('event_name')
+                wd['date'] = wd.get('event_date')
+                wd['time'] = "" # Backend doesn't return time in this format yet
+                wd['location'] = f"Site {wd.get('site_id')}" # Site name needs another join or lookup
+                wd['signed_up'] = wd.get('signup_count', 0)
+                wd['capacity'] = wd.get('volunteers_needed', 0)
+                wd['needs_help'] = wd.get('spots_remaining', 0) > 0
+                
+                # Fetch tasks for each workday
+                tasks_r = requests.get(f"{API_BASE}/workdays/{wd['id']}/tasks")
+                if tasks_r.status_code == 200:
+                    wd['tasks'] = []
+                    for t in tasks_r.json():
+                        wd['tasks'].append({
+                            "id": t['task_id'],
+                            "name": t['task_description'],
+                            "hours": 2.0, # Defaulting hours since it's not in DB
+                            "spots_left": 1 if t['status'] == 'pending' else 0,
+                            "full": t['status'] != 'pending'
+                        })
+                else:
+                    wd['tasks'] = []
+            return workdays
+    except Exception as e:
+        logger.error(f"Error fetching workdays: {e}")
+    return []
 
 def signup_for_task(workday_id, task_id, volunteer_id):
     try:
+        # Note: The backend create_workday_signup only takes user_id and workday_id
+        # and doesn't support task_id currently in the signup table schema
         r = requests.post(
             f"{API_BASE}/workdays/{workday_id}/signups",
-            json={"task_id": task_id, "volunteer_id": volunteer_id},
+            json={"user_id": volunteer_id},
         )
         return r.status_code in (200, 201)
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error signing up: {e}")
         return False
 
 def cancel_signup(signup_id):

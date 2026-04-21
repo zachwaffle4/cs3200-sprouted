@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 st.set_page_config(layout='wide')
 SideBarLinks()
 
-API_BASE = "http://web-api:4000"
+API_BASE = "http://api:4000"
 MARIA_USER_ID = 5
 
 # helper functions for API calls
