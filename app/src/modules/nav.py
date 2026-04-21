@@ -146,11 +146,6 @@ def SideBarLinks(show_home=False):
             lucia_browse_nav()
             lucia_requests_nav()
 
-        if st.session_state["role"] == "food_bank_coordinator":
-            lucia_dashboard_nav()
-            lucia_browse_nav()
-            lucia_requests_nav()
-
     if st.session_state["authenticated"]:
         if st.sidebar.button("Logout"):
             del st.session_state["role"]
