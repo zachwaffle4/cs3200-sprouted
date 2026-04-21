@@ -28,6 +28,7 @@ services:
       - db
     command: >
       sh -c "
+      pip install faker
       until python -c 'import os, mysql.connector; mysql.connector.connect(host=os.environ.get(\"DB_HOST\",\"db\"), user=os.environ.get(\"DB_USER\",\"root\"), password=os.environ.get(\"MYSQL_ROOT_PASSWORD\",\"\"), database=os.environ.get(\"DB_NAME\",\"sprouted\")).close()' 2>/dev/null; do echo 'waiting for mysql...'; sleep 2; done &&
       python /database-files/seed.py &&
       python -u backend_app.py
