@@ -9,7 +9,7 @@ SideBarLinks()
 
 API_BASE = "http://web-api:4000"
 
-
+# API helper functions
 def api_get(path, params=None):
     try:
         r = requests.get(f"{API_BASE}{path}", params=params, timeout=5)
@@ -18,7 +18,6 @@ def api_get(path, params=None):
     except Exception as e:
         logger.error("GET %s failed: %s", path, e)
         return None
-
 
 def api_post(path, payload):
     try:
@@ -29,7 +28,6 @@ def api_post(path, payload):
         logger.error("POST %s failed: %s", path, e)
         return None
 
-
 def api_put(path, payload):
     try:
         r = requests.put(f"{API_BASE}{path}", json=payload, timeout=5)
@@ -38,7 +36,6 @@ def api_put(path, payload):
     except Exception as e:
         logger.error("PUT %s failed: %s", path, e)
         return None
-
 
 def api_delete(path):
     try:
@@ -62,11 +59,11 @@ for p in plots_raw:
         continue
     seen_plot_ids.add(p["plot_id"])
     all_plots.append({
-        "id":            p["plot_id"],
-        "plot_label":    p.get("plot_name", f"Plot {p['plot_id']}"),
-        "status":        STATUS_DISPLAY.get(p.get("occupancy_status", ""), p.get("occupancy_status", "Unknown")),
-        "owner":         f"User {p['assigned_user_id']}" if p.get("assigned_user_id") else "—",
-        "owner_id":      p.get("assigned_user_id"),
+        "id": p["plot_id"],
+        "plot_label": p.get("plot_name", f"Plot {p['plot_id']}"),
+        "status": STATUS_DISPLAY.get(p.get("occupancy_status", ""), p.get("occupancy_status", "Unknown")),
+        "owner": f"User {p['assigned_user_id']}" if p.get("assigned_user_id") else "—",
+        "owner_id": p.get("assigned_user_id"),
         "assignment_id": p.get("active_assignment_id"),
     })
 
@@ -74,10 +71,10 @@ for p in plots_raw:
 waitlist_raw = api_get("/waitlist") or []
 waitlist_queue = [
     {
-        "id":       a["application_id"],
-        "member":   a["name"],
+        "id": a["application_id"],
+        "member": a["name"],
         "requested": a.get("plot_name") or "Any Available",
-        "date":     str(a.get("requested_date", "")),
+        "date": str(a.get("requested_date", "")),
     }
     for a in waitlist_raw
 ]
@@ -129,7 +126,7 @@ if st.session_state["editing_plot"] is not None:
             min_value=0,
             step=1,
         )
-        save   = st.form_submit_button("Save Changes")
+        save = st.form_submit_button("Save Changes")
         cancel = st.form_submit_button("Cancel")
 
         if save:

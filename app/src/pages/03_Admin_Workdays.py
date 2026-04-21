@@ -11,7 +11,6 @@ SideBarLinks()
 API_BASE = "http://web-api:4000"
 SITE_ID = 1
 
-
 def api_get(path, params=None):
     try:
         r = requests.get(f"{API_BASE}{path}", params=params, timeout=5)
@@ -20,7 +19,6 @@ def api_get(path, params=None):
     except Exception as e:
         logger.error("GET %s failed: %s", path, e)
         return None
-
 
 def api_post(path, payload):
     try:
@@ -31,7 +29,6 @@ def api_post(path, payload):
         logger.error("POST %s failed: %s", path, e)
         return None
 
-
 def api_delete(path):
     try:
         r = requests.delete(f"{API_BASE}{path}", timeout=5)
@@ -41,7 +38,6 @@ def api_delete(path):
         logger.error("DELETE %s failed: %s", path, e)
         return None
 
-
 def api_put(path, payload):
     try:
         r = requests.put(f"{API_BASE}{path}", json=payload, timeout=5)
@@ -50,7 +46,6 @@ def api_put(path, payload):
     except Exception as e:
         logger.error("PUT %s failed: %s", path, e)
         return None
-
 
 def fmt_date(d):
     try:
@@ -66,22 +61,22 @@ for w in workdays_raw:
     tasks_raw = api_get(f"/workdays/{w['workday_id']}/tasks") or []
     tasks = [
         {
-            "id":           t["task_id"],
-            "name":         t.get("task_description", ""),
-            "urgency":      t.get("urgency", "—"),
-            "location":     t.get("location_note", "—"),
-            "status":       t.get("status", "pending"),
+            "id": t["task_id"],
+            "name": t.get("task_description", ""),
+            "urgency": t.get("urgency", "—"),
+            "location": t.get("location_note", "—"),
+            "status": t.get("status", "pending"),
         }
         for t in tasks_raw
     ]
     existing_workdays.append({
-        "id":          w["workday_id"],
-        "name":        w["event_name"],
-        "date":        fmt_date(w.get("event_date", "")),
+        "id": w["workday_id"],
+        "name": w["event_name"],
+        "date": fmt_date(w.get("event_date", "")),
         "description": w.get("description", ""),
-        "signed_up":   w.get("signup_count", 0),
-        "needed":      max(int(w.get("volunteers_needed", 1)), 1),
-        "tasks":       tasks,
+        "signed_up": w.get("signup_count", 0),
+        "needed": max(int(w.get("volunteers_needed", 1)), 1),
+        "tasks": tasks,
     })
 
 # Session states
@@ -91,8 +86,7 @@ if "new_tasks" not in st.session_state:
 if "expanded_workday" not in st.session_state:
     st.session_state["expanded_workday"] = None
 
-# ── UI ────────────────────────────────────────────────────────────────────────
-
+# Page Contents
 st.title("Workdays Manager")
 st.divider()
 
@@ -166,10 +160,10 @@ st.caption("Create a new workday event with tasks for volunteers.")
 with st.form("new_workday_form"):
     event_name = st.text_input("Event Name")
     date_col, start_col, end_col = st.columns(3)
-    event_date       = date_col.date_input("Date")
+    event_date = date_col.date_input("Date")
     event_start_time = start_col.time_input("Start Time")
-    event_end_time   = end_col.time_input("End Time")
-    event_desc       = st.text_area("Description")
+    event_end_time = end_col.time_input("End Time")
+    event_desc = st.text_area("Description")
     volunteers_needed = st.number_input("Volunteers Needed", min_value=1, max_value=100, value=12)
 
     submitted = st.form_submit_button("Create Workday")
@@ -179,12 +173,12 @@ with st.form("new_workday_form"):
             st.error("Please enter an event name.")
         else:
             payload = {
-                "site_id":          SITE_ID,
-                "event_name":       event_name,
-                "event_date":       str(event_date),
-                "start_time":       str(event_start_time),
-                "end_time":         str(event_end_time),
-                "description":      event_desc,
+                "site_id": SITE_ID,
+                "event_name": event_name,
+                "event_date": str(event_date),
+                "start_time": str(event_start_time),
+                "end_time": str(event_end_time),
+                "description": event_desc,
                 "volunteers_needed": volunteers_needed,
             }
             result = api_post("/workdays", payload)
@@ -195,8 +189,8 @@ with st.form("new_workday_form"):
                     if task.get("name", "").strip():
                         task_payload = {
                             "task_description": task["name"],
-                            "urgency":          task.get("urgency", "low"),
-                            "location_note":    task.get("location", ""),
+                            "urgency": task.get("urgency", "low"),
+                            "location_note": task.get("location", ""),
                         }
                         if api_post(f"/workdays/{new_wd_id}/tasks", task_payload):
                             tasks_created += 1

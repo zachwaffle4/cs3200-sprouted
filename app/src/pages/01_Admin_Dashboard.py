@@ -79,7 +79,7 @@ pest_reports = [
     for r in pest_raw
 ]
 
-# ── UI ────────────────────────────────────────────────────────────────────────
+# Page Content
 
 st.title("Garden Administration Dashboard")
 
