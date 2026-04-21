@@ -55,6 +55,7 @@ def cancel_request(request_id):
 st.set_page_config(page_title="My Requests – Sprouted", layout="wide")
 
 #SideBarLinks()
+SideBarLinks()
 
 st.markdown("""
 <style>
@@ -137,7 +138,6 @@ for req in filtered:
                     st.error("Could not cancel. Please try again.")
         elif req["status"] == "Confirmed":
             st.button("View details", key=f"view_{req['id']}")
-
     st.divider()
 
 st.caption(f"Showing {len(filtered)} of {len(requests_data)} requests")
