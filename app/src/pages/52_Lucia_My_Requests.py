@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 #from modules.nav import SideBarLinks
 
-API_BASE = "http://web-api:4000"
+API_BASE = "http://api:4000"
 
 def get_my_requests(food_bank_id):
     try:
@@ -27,6 +27,8 @@ def get_my_requests(food_bank_id):
                 return result
     except Exception:
         pass
+    except Exception as e:
+        st.error(f"Error: {e}")
     return [
         {"id": 101, "crop": "Roma tomatoes", "type": "Vegetable", "lbs": 12,
          "site": "Elm Street Garden", "plot": "Plot 14", "preferred_date": "Apr 1, 2026",
@@ -47,7 +49,8 @@ def get_my_requests(food_bank_id):
 
 def cancel_request(request_id):
     try:
-        r = requests.delete(f"{API_BASE}/surplus/{request_id}/requests")
+        # Correct endpoint from surplus_routes.py
+        r = requests.delete(f"{API_BASE}/surplus/requests/{request_id}")
         return r.status_code in (200, 204)
     except Exception:
         return False

@@ -8,7 +8,7 @@ st.set_page_config(layout='wide')
 
 SideBarLinks()
 
-API_BASE = "http://web-api:4000"
+API_BASE = "http://api:4000"
 
 def get_workday_tasks(workday_id):
     try:
