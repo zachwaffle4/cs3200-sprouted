@@ -410,6 +410,8 @@ def main ():
     seedTasks(numTasks)
     seedSignUps(numSignUps)
     seedLogs(numLogs)
+    seedApplications(numApplications)
+
     retrieveAll()
 
     MySQL.close()
