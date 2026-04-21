@@ -1,80 +1,78 @@
 # Idea borrowed from https://github.com/fsmosca/sample-streamlit-authenticator
 
 # This file has functions to add links to the left sidebar based on the user's role.
-
 import streamlit as st
-
 
 # ---- General ----------------------------------------------------------------
 
 def home_nav():
     st.sidebar.page_link("Home.py", label="Home", icon="🏠")
 
-
 def about_page_nav():
     st.sidebar.page_link("pages/30_About.py", label="About", icon="🧠")
 
 
-# ---- Role: pol_strat_advisor ------------------------------------------------
+# ---- Role: garden_admin ------------------------------------------------
 
-def pol_strat_home_nav():
+def garden_admin_home_nav():
     st.sidebar.page_link(
-        "pages/00_Pol_Strat_Home.py", label="Political Strategist Home", icon="👤"
+        "pages/00_Admin_Home.py", label="Garden Admin Home", icon="🏠"
+    )
+
+def admin_dashboard_nav():
+    st.sidebar.page_link(
+        "pages/01_Admin_Dashboard.py", label="Dashboard", icon="📊"
+    )
+
+def admin_plots_nav():
+    st.sidebar.page_link(
+        "pages/02_Admin_Plots.py", label="Plot Manager", icon="🌱"
+    )
+
+def admin_workdays_nav():
+    st.sidebar.page_link(
+        "pages/03_Admin_Workdays.py", label="Workdays Manager", icon="📅"
     )
 
 
-def world_bank_viz_nav():
+# ---- Role: plot_owner -----------------------------------------------------
+# TODO: add plot owner links here + update method names
+
+
+# ---- Role: volunteer ----------------------------------------------------
+def volunteer_home_nav():
     st.sidebar.page_link(
-        "pages/01_World_Bank_Viz.py", label="World Bank Visualization", icon="🏦"
+        "pages/40_Clark_Home.py", label="Volunteer Home", icon="🏠"
+    )
+
+def volunteer_open_tasks_nav():
+    st.sidebar.page_link(
+        "pages/41_Clark_Open_Tasks.py", label="Open Tasks", icon="📋"
+    )
+
+def volunteer_my_hours_nav():
+    st.sidebar.page_link(
+        "pages/42_Clark_My_Hours.py", label="My Hours", icon="⏱️"
+    )
+
+def volunteer_event_detail_nav():
+    st.sidebar.page_link(
+        "pages/43_Clark_Event_Detail.py", label="Event Detail", icon="📍"
     )
 
 
-def map_demo_nav():
-    st.sidebar.page_link("pages/02_Map_Demo.py", label="Map Demonstration", icon="🗺️")
+# ---- Role: food_bank_coordinator ----------------------------------------------------
+
+def lucia_dashboard_nav():
+    st.sidebar.page_link("pages/50_Lucia_Dashboard.py", label="Dashboard", icon="📊")
 
 
-# ---- Role: usaid_worker -----------------------------------------------------
-
-def usaid_worker_home_nav():
-    st.sidebar.page_link(
-        "pages/10_USAID_Worker_Home.py", label="USAID Worker Home", icon="🏠"
-    )
+def lucia_browse_nav():
+    st.sidebar.page_link("pages/51_Lucia_Browse_Surplus.py", label="Browse Surplus", icon="🥦")
 
 
-def ngo_directory_nav():
-    st.sidebar.page_link("pages/14_NGO_Directory.py", label="NGO Directory", icon="📁")
-
-
-def add_ngo_nav():
-    st.sidebar.page_link("pages/15_Add_NGO.py", label="Add New NGO", icon="➕")
-
-
-def prediction_nav():
-    st.sidebar.page_link(
-        "pages/11_Prediction.py", label="Regression Prediction", icon="📈"
-    )
-
-
-def api_test_nav():
-    st.sidebar.page_link("pages/12_API_Test.py", label="Test the API", icon="🛜")
-
-
-def classification_nav():
-    st.sidebar.page_link(
-        "pages/13_Classification.py", label="Classification Demo", icon="🌺"
-    )
-
-
-# ---- Role: administrator ----------------------------------------------------
-
-def admin_home_nav():
-    st.sidebar.page_link("pages/20_Admin_Home.py", label="System Admin", icon="🖥️")
-
-
-def ml_model_mgmt_nav():
-    st.sidebar.page_link(
-        "pages/21_ML_Model_Mgmt.py", label="ML Model Management", icon="🏢"
-    )
+def lucia_requests_nav():
+    st.sidebar.page_link("pages/52_Lucia_My_Requests.py", label="My Requests", icon="📋")
 
 
 # ---- Sidebar assembly -------------------------------------------------------
@@ -98,22 +96,25 @@ def SideBarLinks(show_home=False):
 
     if st.session_state["authenticated"]:
 
-        if st.session_state["role"] == "pol_strat_advisor":
-            pol_strat_home_nav()
-            world_bank_viz_nav()
-            map_demo_nav()
+        if st.session_state["role"] == "garden_admin":
+            garden_admin_home_nav()
+            admin_dashboard_nav()
+            admin_plots_nav()
+            admin_workdays_nav()
 
-        if st.session_state["role"] == "usaid_worker":
-            usaid_worker_home_nav()
-            ngo_directory_nav()
-            add_ngo_nav()
-            prediction_nav()
-            api_test_nav()
-            classification_nav()
+        if st.session_state["role"] == "plot_owner":
+            pass  # TODO: add plot owner nav calls here
 
-        if st.session_state["role"] == "administrator":
-            admin_home_nav()
-            ml_model_mgmt_nav()
+        if st.session_state["role"] == "volunteer":
+            volunteer_home_nav()
+            volunteer_open_tasks_nav()
+            volunteer_my_hours_nav()
+            volunteer_event_detail_nav()
+
+        if st.session_state["role"] == "food_bank_coordinator":
+            lucia_dashboard_nav()
+            lucia_browse_nav()
+            lucia_requests_nav()
 
     # About link appears at the bottom for all roles
     about_page_nav()
