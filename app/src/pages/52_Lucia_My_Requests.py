@@ -1,16 +1,31 @@
 import streamlit as st
 import requests
-from modules.nav import SideBarLinks
+#from modules.nav import SideBarLinks
 
 API_BASE = "http://api:4000"
 
 def get_my_requests(food_bank_id):
     try:
-        # Backend doesn't have a direct /food-banks/{id}/requests,
-        # but we can filter surplus listings or requests if there was an endpoint.
-        # Looking at surplus_routes, there is no GET /surplus/requests.
-        # Let's check if we can add one or if we should use a different approach.
-        # For now, I'll update the cancel_request to the correct endpoint.
+        r = requests.get(f"{API_BASE}/surplus")
+        if r.status_code == 200:
+            listings = r.json()
+            result = []
+            for l in listings:
+                if l.get("status") in ("pending", "completed"):
+                    result.append({
+                        "id": l.get("listing_id", l.get("id")),
+                        "crop": f"Crop {l.get('crop_id', '?')}",
+                        "type": "Vegetable",
+                        "lbs": l.get("quantity_lbs", 0),
+                        "site": f"Site {l.get('site_id', '?')}",
+                        "plot": f"Plot {l.get('plot_id', '?')}",
+                        "preferred_date": str(l.get("listing_date", "")),
+                        "status": l.get("status", "Pending").capitalize(),
+                        "confirmed_date": None,
+                    })
+            if result:
+                return result
+    except Exception:
         pass
     except Exception as e:
         st.error(f"Error: {e}")
@@ -124,8 +139,7 @@ for req in filtered:
                 else:
                     st.error("Could not cancel. Please try again.")
         elif req["status"] == "Confirmed":
-            st.button("View details", key=f"view_{req['id']}") 
-
+            st.button("View details", key=f"view_{req['id']}")
     st.divider()
 
 st.caption(f"Showing {len(filtered)} of {len(requests_data)} requests")
