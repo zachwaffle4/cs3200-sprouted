@@ -9,32 +9,46 @@ st.set_page_config(layout='wide')
 
 SideBarLinks()
 
-API_BASE = "http://localhost:4001/api"
+API_BASE = "http://api:4000"
 
 def get_volunteer_log(volunteer_id):
     try:
         r = requests.get(f"{API_BASE}/volunteers/{volunteer_id}/log")
         if r.status_code == 200:
-            return r.json()
-    except Exception:
-        pass
-    return {
-        "total_hours": 30.0,
-        "goal_hours": 60.0,
-        "entries": [
-            {"id": 1, "date": "2024-09-30", "event_task": "Fall Cleanup – Bed Weeding", "hours": 3.0, "status": "Verified"},
-            {"id": 2, "date": "2024-09-21", "event_task": "Seedling Potting Workshop", "hours": 3.0, "status": "Verified"},
-            {"id": 3, "date": "2024-09-11", "event_task": "Compost Turning", "hours": 3.0, "status": "Verified"},
-            {"id": 4, "date": "2024-09-10", "event_task": "Tool Cleaning & Storage", "hours": 3.0, "status": "Verified"},
-            {"id": 5, "date": "2024-09-01", "event_task": "Drip Line Inspection", "hours": 3.0, "status": "Pending"},
-        ]
-    }
+            entries = r.json()
+            total_hours = sum(e.get('hours_logged', 0) for e in entries)
+            # Transform to match frontend expectations
+            formatted_entries = []
+            for e in entries:
+                formatted_entries.append({
+                    "id": e.get('log_id'),
+                    "date": e.get('work_date'),
+                    "event_task": e.get('task_description') or e.get('event_name') or "General Work",
+                    "hours": float(e.get('hours_logged', 0)),
+                    "status": "Verified" # Defaulting since status isn't in Volunteer_Log
+                })
+            return {
+                "total_hours": float(total_hours),
+                "goal_hours": 60.0,
+                "entries": formatted_entries
+            }
+    except Exception as e:
+        logger.error(f"Error fetching volunteer log: {e}")
+    return {"total_hours": 0.0, "goal_hours": 60.0, "entries": []}
 
 def log_hours(volunteer_id, payload):
     try:
-        r = requests.post(f"{API_BASE}/volunteers/{volunteer_id}/log", json=payload)
+        # Map frontend payload to backend expected fields
+        backend_payload = {
+            "work_date": payload.get("date"),
+            "hours_logged": payload.get("hours"),
+            "notes": payload.get("notes"),
+            "task_id": payload.get("task_id")
+        }
+        r = requests.post(f"{API_BASE}/volunteers/{volunteer_id}/log", json=backend_payload)
         return r.status_code in (200, 201), r.json() if r.status_code in (200, 201) else {}
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error logging hours: {e}")
         return False, {}
 
 def cancel_signup(signup_id):
