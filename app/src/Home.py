@@ -33,8 +33,9 @@ SideBarLinks(show_home=True)
 # ***************************************************
 
 logger.info("Loading the Home page of the app")
-st.title('CS 3200 Project Template')
-st.write('#### Hi! As which user would you like to log in?')
+st.title('Sprouted')
+st.write('#### A Community Garden Management App.')
+st.write('#### Welcome! As which user would you like to log in?')
 
 # For each of the user personas for which we are implementing
 # functionality, we put a button on the screen that the user
@@ -53,7 +54,7 @@ if st.button("Act as Derek Washington, a Garden Administrator",
     # finally, we ask streamlit to switch to another page, in this case, the
     # landing page for this particular user type
     logger.info("Logging in as Garden Administrator Persona")
-    st.switch_page('pages/20_Admin_Home.py')
+    st.switch_page('pages/00_Admin_Home.py')
 
 if st.button('Act as Maria Santons, a Plot Owner',
              type='primary',
@@ -71,7 +72,7 @@ if st.button('Act as Clark Kent, a Volunteer',
     st.session_state['role'] = 'volunteer'
     st.session_state['first_name'] = 'Clark'
     logger.info("Logging in as Volunteer Persona")
-    st.switch_page('pages/00_Pol_Strat_Home.py') # TODO: change this to the actual page for Volunteer
+    st.switch_page('pages/40_Clark_Home.py')
 
 if st.button('Act as Lucia Tran, a Food Bank Coordinator',
              type='primary',

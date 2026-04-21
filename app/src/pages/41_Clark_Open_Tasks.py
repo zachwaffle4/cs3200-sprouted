@@ -1,6 +1,12 @@
-import streamlit as st
+import logging
 import requests
-#from modules.nav import SideBarLinks
+import streamlit as st
+from modules.nav import SideBarLinks
+logger = logging.getLogger(__name__)
+
+st.set_page_config(layout='wide')
+
+SideBarLinks()
 
 API_BASE = "http://localhost:4001/api"
 
@@ -61,8 +67,6 @@ def cancel_signup(signup_id):
         return False
 
 st.set_page_config(page_title="Open Tasks – Sprouted", layout="wide")
-
-#SideBarLinks()
 
 st.markdown("""
 <style>

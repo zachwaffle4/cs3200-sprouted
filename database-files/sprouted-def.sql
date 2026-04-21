@@ -179,6 +179,20 @@ CREATE TABLE Pickup (
         FOREIGN KEY (request_id) REFERENCES Produce_Request(request_id)
 );
 
+-- Plot applications and waitlist
+
+CREATE TABLE Plot_Application (
+    application_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id        INT NOT NULL,
+    plot_id        INT,
+    requested_date DATE NOT NULL,
+    status         VARCHAR(20) NOT NULL DEFAULT 'pending',
+    CONSTRAINT fk_app_user
+        FOREIGN KEY (user_id) REFERENCES User (user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_app_plot
+        FOREIGN KEY (plot_id) REFERENCES Plot (plot_id) ON DELETE SET NULL
+);
+
 -- Workday-related: Tasks and Signups
 
 CREATE TABLE Workday_Task (
