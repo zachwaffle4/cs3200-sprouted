@@ -12,6 +12,7 @@ from backend.pests.pest_routes import pests_bp
 from backend.surplus.surplus_routes import surplus_bp
 from backend.analytics.analytics_routes import analytics_bp
 from backend.applications.application_routes import applications_bp
+from backend.plantings.plantings_routes import plantings_bp
 
 
 def create_app():
@@ -49,5 +50,6 @@ def create_app():
     app.register_blueprint(surplus_bp)
     app.register_blueprint(analytics_bp)
     app.register_blueprint(applications_bp)
+    app.register_blueprint(plantings_bp)
 
     return app

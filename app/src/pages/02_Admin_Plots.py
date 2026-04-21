@@ -7,12 +7,13 @@ logger = logging.getLogger(__name__)
 st.set_page_config(layout='wide')
 SideBarLinks()
 
-API_BASE = "http://web-api:4000"
+API_BASE = "http://api:4000"
 
 # API helper functions
 def api_get(path, params=None):
     try:
-        r = requests.get(f"{API_BASE}{path}", params=params, timeout=5)
+        url = f"{API_BASE}{path}"
+        r = requests.get(url, params=params, timeout=5)
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -21,7 +22,8 @@ def api_get(path, params=None):
 
 def api_post(path, payload):
     try:
-        r = requests.post(f"{API_BASE}{path}", json=payload, timeout=5)
+        url = f"{API_BASE}{path}"
+        r = requests.post(url, json=payload, timeout=5)
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -30,7 +32,8 @@ def api_post(path, payload):
 
 def api_put(path, payload):
     try:
-        r = requests.put(f"{API_BASE}{path}", json=payload, timeout=5)
+        url = f"{API_BASE}{path}"
+        r = requests.put(url, json=payload, timeout=5)
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -39,7 +42,8 @@ def api_put(path, payload):
 
 def api_delete(path):
     try:
-        r = requests.delete(f"{API_BASE}{path}", timeout=5)
+        url = f"{API_BASE}{path}"
+        r = requests.delete(url, timeout=5)
         r.raise_for_status()
         return r.json()
     except Exception as e:

@@ -1,44 +1,59 @@
 import streamlit as st
 import requests
 from modules.nav import SideBarLinks
-
-API_BASE = "http://web-api:4000"
-
+ 
+API_BASE = "http://api:4000"
+ 
 def get_dashboard_data(food_bank_id, season="2026", compare_to="2025"):
     try:
-        r = requests.get(f"{API_BASE}/surplus")
-        if r.status_code == 200:
-            listings = r.json()
-            total_lbs = sum(l.get("quantity_lbs", 0) for l in listings)
-            return {
-                "total_received_lbs": total_lbs,
-                "total_received_change": 12,
-                "pickups_completed": len([l for l in listings if l.get("status") == "completed"]),
-                "pickups_change": 5,
-                "garden_partners": 3,
-                "garden_partners_change": 0,
-                "crop_varieties": len(set(l.get("crop_id") for l in listings)),
-                "crop_varieties_change": 3,
-                "monthly_data": {
-                    "months": ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"],
-                    "current": [20, 85, 120, 160, 175, 140, 95, 52],
-                    "previous": [15, 70, 100, 130, 150, 120, 80, 40],
-                },
-                "top_sites": [
-                    {"name": "Elm Street Garden", "lbs": 412, "pickups": 19},
-                    {"name": "Riverside Plots", "lbs": 268, "pickups": 12},
-                    {"name": "MLK Community Farm", "lbs": 167, "pickups": 8},
-                ],
-                "crop_breakdown": [
-                    {"crop": "Tomatoes", "lbs": 214, "pct": 25},
-                    {"crop": "Zucchini", "lbs": 178, "pct": 21},
-                    {"crop": "Peppers", "lbs": 136, "pct": 16},
-                    {"crop": "Collard greens", "lbs": 102, "pct": 12},
-                    {"crop": "Other (10 types)", "lbs": 217, "pct": 26},
-                ],
-            }
-    except Exception:
-        pass
+        # Fetch actual analytics data from backend
+        r_months = requests.get(f"{API_BASE}/analytics/donations-by-month", params={"org_id": food_bank_id})
+        r_sites = requests.get(f"{API_BASE}/analytics/top-sites", params={"org_id": food_bank_id})
+        
+        monthly_raw = r_months.json() if r_months.status_code == 200 else []
+        sites_raw = r_sites.json() if r_sites.status_code == 200 else []
+        
+        # Transform monthly data
+        months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        current_vals = [0.0] * 12
+        for entry in monthly_raw:
+            try:
+                m_idx = int(entry['month'].split('-')[1]) - 1
+                current_vals[m_idx] += float(entry['total_lbs'])
+            except: continue
+            
+        total_lbs = sum(current_vals)
+        
+        # Transform sites data
+        top_sites = []
+        for s in sites_raw[:5]:
+            top_sites.append({
+                "name": s.get('site_name'),
+                "lbs": s.get('total_contributed_lbs'),
+                "pickups": "N/A" # Backend doesn't count pickups yet
+            })
+            
+        return {
+            "total_received_lbs": total_lbs,
+            "total_received_change": 0,
+            "pickups_completed": len(monthly_raw),
+            "pickups_change": 0,
+            "garden_partners": len(sites_raw),
+            "garden_partners_change": 0,
+            "crop_varieties": len(set(e.get('crop_type') for e in monthly_raw)),
+            "crop_varieties_change": 0,
+            "monthly_data": {
+                "months": months,
+                "current": current_vals,
+                "previous": [0.0] * 12,
+            },
+            "top_sites": top_sites,
+            "crop_breakdown": [], # Can be derived from monthly_raw if needed
+        }
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    # Fallback to mock data if API fails or returns empty
     return {
         "total_received_lbs": 847,
         "total_received_change": 12,

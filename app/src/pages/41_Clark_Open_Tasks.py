@@ -79,12 +79,15 @@ def get_workdays():
 
 def signup_for_task(workday_id, task_id, volunteer_id):
     try:
+        # Note: The backend create_workday_signup only takes user_id and workday_id
+        # and doesn't support task_id currently in the signup table schema
         r = requests.post(
             f"{API_BASE}/workdays/{workday_id}/signups",
             json={"user_id": volunteer_id},
         )
         return r.status_code in (200, 201)
-    except Exception:
+    except Exception as e:
+        logger.error(f"Error signing up: {e}")
         return False
 
 def cancel_signup(signup_id):

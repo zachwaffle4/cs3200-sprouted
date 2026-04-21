@@ -2,7 +2,7 @@ import streamlit as st
 import requests as req
 from modules.nav import SideBarLinks
 
-API_BASE = "http://localhost:4001/api"
+API_BASE = "http://api:4000"
 
 def get_surplus_listings():
     try:
@@ -53,7 +53,8 @@ def cancel_request(request_id):
     try:
         r = req.delete(f"{API_BASE}/surplus/requests/{request_id}")
         return r.status_code in (200, 204)
-    except Exception:
+    except Exception as e:
+        st.error(f"Error cancelling request: {e}")
         return False
 
 st.set_page_config(page_title="Browse Surplus – Sprouted", layout="wide")

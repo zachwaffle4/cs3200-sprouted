@@ -51,6 +51,46 @@ def get_surplus_listings():
         cursor.close()
 
 
+@surplus_bp.route("/surplus", methods=["POST"])
+def create_surplus_listing():
+    """Create a new surplus listing from a plot owner."""
+    cursor = get_db().cursor()
+    try:
+        data = request.get_json() or {}
+        required = ["plot_id", "crop_id", "quantity_lbs"]
+        missing = [field for field in required if field not in data]
+        if missing:
+            return (
+                jsonify({"error": f"Missing required fields: {', '.join(missing)}"}),
+                400,
+            )
+
+        query = """
+            INSERT INTO Surplus_Listing (plot_id, crop_id, quantity_lbs,
+                                         listed_date, freshness_note, status)
+            VALUES (%s, %s, %s, CURDATE(), %s, 'available')
+        """
+        cursor.execute(
+            query,
+            (
+                data["plot_id"],
+                data["crop_id"],
+                data["quantity_lbs"],
+                data.get("freshness_note"),
+            ),
+        )
+        get_db().commit()
+        return (
+            jsonify({"message": "Surplus listing created", "listing_id": cursor.lastrowid}),
+            201,
+        )
+    except Error as e:
+        current_app.logger.error(f"Error creating surplus listing: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+
+
 @surplus_bp.route("/surplus/requests", methods=["POST"])
 def create_pickup_request():
     cursor = get_db().cursor()

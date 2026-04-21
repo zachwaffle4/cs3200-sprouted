@@ -1,6 +1,6 @@
 ﻿import streamlit as st
 import requests
-from modules.nav import SideBarLinks
+#from modules.nav import SideBarLinks
 
 API_BASE = "http://web-api:4000"
 
@@ -39,6 +39,8 @@ def get_my_requests(org_id):
                 return result
     except Exception:
         pass
+    except Exception as e:
+        st.error(f"Error: {e}")
     return [
         {"id": 101, "crop": "Roma tomatoes", "type": "Vegetable", "lbs": 12,
          "site": "Elm Street Garden", "plot": "Plot 14", "preferred_date": "Apr 1, 2026",
