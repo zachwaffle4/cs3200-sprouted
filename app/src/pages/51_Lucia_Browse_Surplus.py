@@ -18,7 +18,7 @@ def get_surplus_listings():
                     "lbs": l.get("quantity_lbs", 0),
                     "site": l.get("site_name", f"Site {l.get('site_id', '?')}"),
                     "plot": l.get("plot_name", f"Plot {l.get('plot_id', '?')}"),
-                    "date": str(l.get("listed_date", "")),
+                    "date": str(l.get("listed_date", ""))[:16].strip(", "),
                     "status": l.get("status", "available"),
                 })
             return result

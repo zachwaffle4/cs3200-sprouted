@@ -88,7 +88,7 @@ waitlist_queue = [
         "id": a["application_id"],
         "member": a["name"],
         "requested": a.get("plot_name") or "Any Available",
-        "date": str(a.get("requested_date", "")),
+        "date": str(a.get("requested_date", ""))[:16].strip(", "),
     }
     for a in waitlist_raw
 ]

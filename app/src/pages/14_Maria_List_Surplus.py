@@ -104,5 +104,5 @@ else:
             c1.write(row.get("plot_name", "—"))
             c2.write(row.get("crop_name", "—"))
             c3.write(f"{float(row.get('quantity_lbs') or 0):.2f}")
-            c4.write(str(row.get("listed_date", "—")))
+            c4.write(str(row.get("listed_date", "—"))[:16].strip(", "))
             c5.write(row.get("freshness_note") or "—")

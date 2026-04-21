@@ -130,7 +130,7 @@ for plot_name, pid in plot_options.items():
 
         for row in rows:
             c1, c2, c3, c4, c5 = st.columns([2, 3, 2, 2, 1])
-            c1.write(str(row.get("harvest_date", "—")))
+            c1.write(str(row.get("harvest_date", "—"))[:16].strip(", "))
             c2.write(row.get("crop_name", "—"))
             qty = float(row.get("quantity_lbs") or 0)
             c3.write("Planting" if qty == 0 else "Harvest")

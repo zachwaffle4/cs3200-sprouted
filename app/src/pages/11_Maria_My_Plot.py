@@ -60,7 +60,7 @@ else:
             c1, c2, c3 = st.columns([2, 3, 3])
             c1.write(p.get("plot_name", f"Plot {p['plot_id']}"))
             c2.write(p.get("site_name", "—"))
-            c3.write(str(p.get("assigned_date", "—")))
+            c3.write(str(p.get("assigned_date", "—"))[:16].strip(", "))
 
 st.divider()
 
@@ -81,7 +81,7 @@ else:
             c1.write(pl.get("plot_name", "—"))
             c2.write(pl.get("crop_name", "—"))
             c3.write(pl.get("crop_type", "—"))
-            c4.write(str(pl.get("expected_harvest_date", "—")))
+            c4.write(str(pl.get("expected_harvest_date", "—"))[:16].strip(", "))
 
 st.divider()
 
@@ -100,5 +100,5 @@ else:
             c1, c2, c3, c4 = st.columns([2, 3, 3, 2])
             c1.write(h.get("plot_name", "—"))
             c2.write(h.get("crop_name", "—"))
-            c3.write(str(h.get("harvest_date", "—")))
+            c3.write(str(h.get("harvest_date", "—"))[:16].strip(", "))
             c4.write(f"{float(h.get('quantity_lbs') or 0):.2f}")
