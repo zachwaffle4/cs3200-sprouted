@@ -410,11 +410,7 @@ def main ():
     seedTasks(numTasks)
     seedSignUps(numSignUps)
     seedLogs(numLogs)
-    seedApplications(numApplications)
-
-    printing_database = input("Type Yes to print database ").lower()
-    if printing_database == 'yes':
-        retrieveAll()
+    retrieveAll()
 
     MySQL.close()
     db.close()
