@@ -21,6 +21,7 @@ def get_surplus_listings():
                 sl.listed_date,
                 sl.freshness_note,
                 sl.status,
+                c.crop_id,
                 c.crop_name,
                 c.crop_type,
                 p.plot_id,
