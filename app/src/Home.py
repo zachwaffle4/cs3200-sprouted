@@ -62,7 +62,7 @@ if st.button(
     st.switch_page("pages/00_Admin_Home.py")
 
 if st.button(
-    "Act as Maria Santons, a Plot Owner", type="primary", use_container_width=True
+    "Act as Maria Santos, a Plot Owner", type="primary", use_container_width=True
 ):
     st.session_state["authenticated"] = True
     st.session_state["role"] = "plot_owner"
