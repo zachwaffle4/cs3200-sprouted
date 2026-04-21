@@ -88,7 +88,7 @@ if not filtered:
 for item in filtered:
     c1, c2, c3 = st.columns([4, 2, 1])
     with c1:
-        st.markdown(f"**{item['crop']} — {item['lbs']:.1f} lbs**")
+        st.markdown(f"**{item['crop']} - {item['lbs']:.1f} lbs**")
         st.caption(f"{item['site']} · {item['plot']} · Preferred: {item['preferred_date']}")
     with c2:
         colors = {"Pending": "#fff3e0", "Confirmed": "#e8f5e9", "Completed": "#f3f4f6", "Cancelled": "#fce4e4"}
@@ -103,7 +103,7 @@ for item in filtered:
             if st.button("Cancel", key=f"cancel_req_{item['id']}"):
                 ok = cancel_request(item["id"])
                 if ok:
-                    st.success(f"Cancelled.")
+                    st.success("Cancelled.")
                     st.rerun()
                 else:
                     st.error("Could not cancel.")
