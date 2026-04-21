@@ -1,15 +1,12 @@
 # Idea borrowed from https://github.com/fsmosca/sample-streamlit-authenticator
 
 # This file has functions to add links to the left sidebar based on the user's role.
-
 import streamlit as st
-
 
 # ---- General ----------------------------------------------------------------
 
 def home_nav():
     st.sidebar.page_link("Home.py", label="Home", icon="🏠")
-
 
 def about_page_nav():
     st.sidebar.page_link("pages/30_About.py", label="About", icon="🧠")
@@ -19,25 +16,22 @@ def about_page_nav():
 
 def garden_admin_home_nav():
     st.sidebar.page_link(
-        "pages/20_Admin_Home.py", label="Garden Admin Home", icon="🏠"
+        "pages/00_Admin_Home.py", label="Garden Admin Home", icon="🏠"
     )
-
 
 def admin_dashboard_nav():
     st.sidebar.page_link(
-        "pages/21_Admin_Dashboard.py", label="Dashboard", icon="📊"
+        "pages/01_Admin_Dashboard.py", label="Dashboard", icon="📊"
     )
-
 
 def admin_plots_nav():
     st.sidebar.page_link(
-        "pages/22_Admin_Plots.py", label="Plot Management", icon="🌱"
+        "pages/02_Admin_Plots.py", label="Plot Manager", icon="🌱"
     )
-
 
 def admin_workdays_nav():
     st.sidebar.page_link(
-        "pages/23_Admin_Workdays.py", label="Workdays Manager", icon="📅"
+        "pages/03_Admin_Workdays.py", label="Workdays Manager", icon="📅"
     )
 
 
@@ -46,18 +40,20 @@ def admin_workdays_nav():
 
 
 # ---- Role: volunteer ----------------------------------------------------
+def volunteer_home_nav():
+    st.sidebar.page_link(
+        "pages/40_Clark_Home.py", label="Volunteer Home", icon="🏠"
+    )
 
 def volunteer_open_tasks_nav():
     st.sidebar.page_link(
         "pages/41_Clark_Open_Tasks.py", label="Open Tasks", icon="📋"
     )
 
-
 def volunteer_my_hours_nav():
     st.sidebar.page_link(
         "pages/42_Clark_My_Hours.py", label="My Hours", icon="⏱️"
     )
-
 
 def volunteer_event_detail_nav():
     st.sidebar.page_link(
@@ -110,6 +106,7 @@ def SideBarLinks(show_home=False):
             pass  # TODO: add plot owner nav calls here
 
         if st.session_state["role"] == "volunteer":
+            volunteer_home_nav()
             volunteer_open_tasks_nav()
             volunteer_my_hours_nav()
             volunteer_event_detail_nav()
