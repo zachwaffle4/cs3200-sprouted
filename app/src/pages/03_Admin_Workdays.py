@@ -5,11 +5,12 @@ from datetime import datetime
 from modules.nav import SideBarLinks
 
 logger = logging.getLogger(__name__)
-st.set_page_config(layout='wide')
+st.set_page_config(layout="wide")
 SideBarLinks()
 
 API_BASE = "http://api:4000"
 SITE_ID = 1
+
 
 def api_get(path, params=None):
     try:
@@ -21,6 +22,7 @@ def api_get(path, params=None):
         logger.error("GET %s failed: %s", path, e)
         return None
 
+
 def api_post(path, payload):
     try:
         url = f"{API_BASE}{path}"
@@ -30,6 +32,7 @@ def api_post(path, payload):
     except Exception as e:
         logger.error("POST %s failed: %s", path, e)
         return None
+
 
 def api_delete(path):
     try:
@@ -41,6 +44,7 @@ def api_delete(path):
         logger.error("DELETE %s failed: %s", path, e)
         return None
 
+
 def api_put(path, payload):
     try:
         url = f"{API_BASE}{path}"
@@ -50,6 +54,7 @@ def api_put(path, payload):
     except Exception as e:
         logger.error("PUT %s failed: %s", path, e)
         return None
+
 
 def fmt_date(d):
     try:
@@ -73,15 +78,17 @@ for w in workdays_raw:
         }
         for t in tasks_raw
     ]
-    existing_workdays.append({
-        "id": w["workday_id"],
-        "name": w["event_name"],
-        "date": fmt_date(w.get("event_date", "")),
-        "description": w.get("description", ""),
-        "signed_up": w.get("signup_count", 0),
-        "needed": max(int(w.get("volunteers_needed", 1)), 1),
-        "tasks": tasks,
-    })
+    existing_workdays.append(
+        {
+            "id": w["workday_id"],
+            "name": w["event_name"],
+            "date": fmt_date(w.get("event_date", "")),
+            "description": w.get("description", ""),
+            "signed_up": w.get("signup_count", 0),
+            "needed": max(int(w.get("volunteers_needed", 1)), 1),
+            "tasks": tasks,
+        }
+    )
 
 # Session states
 if "new_tasks" not in st.session_state:
@@ -95,7 +102,9 @@ st.title("Workdays Manager")
 st.divider()
 
 st.subheader("Scheduled Workdays")
-st.caption("View, edit, or delete any upcoming community workdays that have been organized.")
+st.caption(
+    "View, edit, or delete any upcoming community workdays that have been organized."
+)
 
 if not existing_workdays:
     st.info("No upcoming workdays scheduled.")
@@ -107,7 +116,9 @@ for wd in existing_workdays:
             st.write(f"**{wd['name']}** — {wd['date']}")
             st.caption(wd["description"])
             ratio = wd["signed_up"] / wd["needed"]
-            st.progress(ratio, text=f"{wd['signed_up']}/{wd['needed']} volunteers signed up")
+            st.progress(
+                ratio, text=f"{wd['signed_up']}/{wd['needed']} volunteers signed up"
+            )
         with col_del:
             if st.button("🗑️", key=f"del_wd_{wd['id']}"):
                 res = api_delete(f"/workdays/{wd['id']}")
@@ -145,7 +156,7 @@ for wd in existing_workdays:
                         # Mark task completed via PUT — GET /tasks filters out completed tasks
                         result = api_put(
                             f"/workdays/{wd['id']}/tasks",
-                            {"task_id": task["id"], "status": "completed"}
+                            {"task_id": task["id"], "status": "completed"},
                         )
                         if result:
                             st.toast(f"Task '{task['name']}' removed.")
@@ -168,7 +179,9 @@ with st.form("new_workday_form"):
     event_start_time = start_col.time_input("Start Time")
     event_end_time = end_col.time_input("End Time")
     event_desc = st.text_area("Description")
-    volunteers_needed = st.number_input("Volunteers Needed", min_value=1, max_value=100, value=12)
+    volunteers_needed = st.number_input(
+        "Volunteers Needed", min_value=1, max_value=100, value=12
+    )
 
     submitted = st.form_submit_button("Create Workday")
 
@@ -198,11 +211,15 @@ with st.form("new_workday_form"):
                         }
                         if api_post(f"/workdays/{new_wd_id}/tasks", task_payload):
                             tasks_created += 1
-                st.toast(f"Workday '{event_name}' created with {tasks_created} task(s)!")
+                st.toast(
+                    f"Workday '{event_name}' created with {tasks_created} task(s)!"
+                )
                 st.session_state["new_tasks"] = []
                 st.rerun()
             else:
-                st.error("Failed to create workday. Ensure all required fields are filled.")
+                st.error(
+                    "Failed to create workday. Ensure all required fields are filled."
+                )
 
 # Dynamic task builder (must be outside st.form to allow st.rerun)
 st.write("**Tasks** *(volunteers will sign up for these)*")
@@ -220,13 +237,18 @@ if st.session_state["new_tasks"]:
             "Task", value=task["name"], key=f"tname_{i}", label_visibility="collapsed"
         )
         st.session_state["new_tasks"][i]["urgency"] = c2.selectbox(
-            "Urgency", ["low", "medium", "high"],
+            "Urgency",
+            ["low", "medium", "high"],
             index=["low", "medium", "high"].index(task.get("urgency", "low")),
-            key=f"turgency_{i}", label_visibility="collapsed"
+            key=f"turgency_{i}",
+            label_visibility="collapsed",
         )
         st.session_state["new_tasks"][i]["location"] = c3.text_input(
-            "Location", value=task.get("location", ""), key=f"tloc_{i}",
-            label_visibility="collapsed", placeholder="e.g. Bed A"
+            "Location",
+            value=task.get("location", ""),
+            key=f"tloc_{i}",
+            label_visibility="collapsed",
+            placeholder="e.g. Bed A",
         )
         if c4.button("🗑️", key=f"rm_task_{i}"):
             st.session_state["new_tasks"].pop(i)

@@ -164,11 +164,13 @@ def get_season_summary(user_id):
         recent_harvests = cursor.fetchall()
 
         return (
-            jsonify({
-                "totals": totals,
-                "active_plantings": active_plantings,
-                "recent_harvests": recent_harvests,
-            }),
+            jsonify(
+                {
+                    "totals": totals,
+                    "active_plantings": active_plantings,
+                    "recent_harvests": recent_harvests,
+                }
+            ),
             200,
         )
     except Error as e:

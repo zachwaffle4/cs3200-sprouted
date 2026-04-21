@@ -5,26 +5,25 @@ import streamlit as st
 
 # ---- General ----------------------------------------------------------------
 
+
 def home_nav():
     st.sidebar.page_link("Home.py", label="Home", icon="🏠")
 
 
 # ---- Role: garden_admin ------------------------------------------------
 
+
 def garden_admin_home_nav():
-    st.sidebar.page_link(
-        "pages/00_Admin_Home.py", label="Garden Admin Home", icon="🏠"
-    )
+    st.sidebar.page_link("pages/00_Admin_Home.py", label="Garden Admin Home", icon="🏠")
+
 
 def admin_dashboard_nav():
-    st.sidebar.page_link(
-        "pages/01_Admin_Dashboard.py", label="Dashboard", icon="📊"
-    )
+    st.sidebar.page_link("pages/01_Admin_Dashboard.py", label="Dashboard", icon="📊")
+
 
 def admin_plots_nav():
-    st.sidebar.page_link(
-        "pages/02_Admin_Plots.py", label="Plot Manager", icon="🌱"
-    )
+    st.sidebar.page_link("pages/02_Admin_Plots.py", label="Plot Manager", icon="🌱")
+
 
 def admin_workdays_nav():
     st.sidebar.page_link(
@@ -34,25 +33,28 @@ def admin_workdays_nav():
 
 # ---- Role: plot_owner -----------------------------------------------------
 
+
 def plot_owner_home_nav():
     st.sidebar.page_link(
         "pages/10_Plot_Owner_Home.py", label="Plot Owner Home", icon="🏠"
     )
 
+
 def maria_my_plot_nav():
-    st.sidebar.page_link(
-        "pages/11_Maria_My_Plot.py", label="My Plot", icon="🌿"
-    )
+    st.sidebar.page_link("pages/11_Maria_My_Plot.py", label="My Plot", icon="🌿")
+
 
 def maria_log_activity_nav():
     st.sidebar.page_link(
         "pages/12_Maria_Log_Activity.py", label="Log Activity", icon="📝"
     )
 
+
 def maria_report_pest_nav():
     st.sidebar.page_link(
         "pages/13_Maria_Report_Pest.py", label="Report Pest", icon="🐛"
     )
+
 
 def maria_list_surplus_nav():
     st.sidebar.page_link(
@@ -62,19 +64,16 @@ def maria_list_surplus_nav():
 
 # ---- Role: volunteer ----------------------------------------------------
 def volunteer_home_nav():
-    st.sidebar.page_link(
-        "pages/40_Clark_Home.py", label="Volunteer Home", icon="🏠"
-    )
+    st.sidebar.page_link("pages/40_Clark_Home.py", label="Volunteer Home", icon="🏠")
+
 
 def volunteer_open_tasks_nav():
-    st.sidebar.page_link(
-        "pages/41_Clark_Open_Tasks.py", label="Open Tasks", icon="📋"
-    )
+    st.sidebar.page_link("pages/41_Clark_Open_Tasks.py", label="Open Tasks", icon="📋")
+
 
 def volunteer_my_hours_nav():
-    st.sidebar.page_link(
-        "pages/42_Clark_My_Hours.py", label="My Hours", icon="⏱️"
-    )
+    st.sidebar.page_link("pages/42_Clark_My_Hours.py", label="My Hours", icon="⏱️")
+
 
 def volunteer_event_detail_nav():
     st.sidebar.page_link(
@@ -84,19 +83,25 @@ def volunteer_event_detail_nav():
 
 # ---- Role: food_bank_coordinator ----------------------------------------------------
 
+
 def lucia_dashboard_nav():
     st.sidebar.page_link("pages/50_Lucia_Dashboard.py", label="Dashboard", icon="📊")
 
 
 def lucia_browse_nav():
-    st.sidebar.page_link("pages/51_Lucia_Browse_Surplus.py", label="Browse Surplus", icon="🥦")
+    st.sidebar.page_link(
+        "pages/51_Lucia_Browse_Surplus.py", label="Browse Surplus", icon="🥦"
+    )
 
 
 def lucia_requests_nav():
-    st.sidebar.page_link("pages/52_Lucia_My_Requests.py", label="My Requests", icon="📋")
+    st.sidebar.page_link(
+        "pages/52_Lucia_My_Requests.py", label="My Requests", icon="📋"
+    )
 
 
 # ---- Sidebar assembly -------------------------------------------------------
+
 
 def SideBarLinks(show_home=False):
     """

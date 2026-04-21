@@ -4,11 +4,12 @@ import streamlit as st
 from modules.nav import SideBarLinks
 
 logger = logging.getLogger(__name__)
-st.set_page_config(layout='wide')
+st.set_page_config(layout="wide")
 SideBarLinks()
 
 API_BASE = "http://api:4000"
 SITE_ID = 1
+
 
 # helper functions for API calls
 def api_get(path, params=None):
@@ -23,6 +24,7 @@ def api_get(path, params=None):
     except Exception as e:
         logger.error("GET %s failed: %s", path, e)
         return None
+
 
 def api_put(path, payload):
     try:
@@ -130,7 +132,9 @@ if upcoming_workdays:
             with st.container(border=True):
                 st.markdown(f"**{wd['date']}**")
                 st.markdown(f"**{wd['name']}**")
-                st.progress(ratio, text=f"{wd['signed_up']}/{wd['needed']} volunteers signed up")
+                st.progress(
+                    ratio, text=f"{wd['signed_up']}/{wd['needed']} volunteers signed up"
+                )
 else:
     st.info("No upcoming workdays scheduled.")
 
@@ -143,9 +147,12 @@ with st.container(border=True):
     wc1.markdown(f"**Water used this month**\n\n{water_budget['used_gal']:,} gal")
     wc2.markdown(f"**Seasonal Budget**\n\n{water_budget['budget_gal']:,} gal")
     water_ratio = water_budget["used_gal"] / water_budget["budget_gal"]
-    st.progress(water_ratio, text=(
-        f"{water_budget['used_gal']:,} / {water_budget['budget_gal']:,} gal used"
-    ))
+    st.progress(
+        water_ratio,
+        text=(
+            f"{water_budget['used_gal']:,} / {water_budget['budget_gal']:,} gal used"
+        ),
+    )
 
 st.divider()
 

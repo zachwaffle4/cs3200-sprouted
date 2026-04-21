@@ -81,7 +81,9 @@ def create_surplus_listing():
         )
         get_db().commit()
         return (
-            jsonify({"message": "Surplus listing created", "listing_id": cursor.lastrowid}),
+            jsonify(
+                {"message": "Surplus listing created", "listing_id": cursor.lastrowid}
+            ),
             201,
         )
     except Error as e:

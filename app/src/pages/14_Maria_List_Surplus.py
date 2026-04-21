@@ -4,11 +4,12 @@ import streamlit as st
 from modules.nav import SideBarLinks
 
 logger = logging.getLogger(__name__)
-st.set_page_config(layout='wide')
+st.set_page_config(layout="wide")
 SideBarLinks()
 
 API_BASE = "http://api:4000"
 MARIA_USER_ID = 5
+
 
 # API helper functions
 def api_get(path, params=None):
@@ -19,6 +20,7 @@ def api_get(path, params=None):
     except Exception as e:
         logger.error("GET %s failed: %s", path, e)
         return None
+
 
 def api_post(path, payload):
     try:
@@ -104,4 +106,3 @@ else:
             c3.write(f"{float(row.get('quantity_lbs') or 0):.2f}")
             c4.write(str(row.get("listed_date", "—")))
             c5.write(row.get("freshness_note") or "—")
-            
