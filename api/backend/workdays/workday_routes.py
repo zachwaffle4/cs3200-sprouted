@@ -90,6 +90,44 @@ def create_workday():
         cursor.close()
 
 
+@workdays_bp.route("/workdays/<int:workday_id>", methods=["DELETE"])
+def delete_workday(workday_id):
+    """Hard-delete a workday and all dependent records.
+
+    Manually cascades because the FK constraints lack ON DELETE CASCADE.
+    Order: Volunteer_Log → Workday_Task → Event_Signup → Workday.
+    """
+    cursor = get_db().cursor()
+    try:
+        cursor.execute("SELECT workday_id FROM Workday WHERE workday_id = %s", (workday_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "Workday not found"}), 404
+
+        # Collect task IDs so we can clean up Volunteer_Log entries
+        cursor.execute(
+            "SELECT task_id FROM Workday_Task WHERE workday_id = %s", (workday_id,)
+        )
+        task_ids = [row[0] for row in cursor.fetchall()]
+
+        if task_ids:
+            placeholders = ",".join(["%s"] * len(task_ids))
+            cursor.execute(
+                f"DELETE FROM Volunteer_Log WHERE task_id IN ({placeholders})", task_ids
+            )
+
+        cursor.execute("DELETE FROM Workday_Task  WHERE workday_id = %s", (workday_id,))
+        cursor.execute("DELETE FROM Event_Signup  WHERE workday_id = %s", (workday_id,))
+        cursor.execute("DELETE FROM Workday       WHERE workday_id = %s", (workday_id,))
+
+        get_db().commit()
+        return jsonify({"message": "Workday deleted"}), 200
+    except Error as e:
+        current_app.logger.error(f"Error deleting workday: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()
+
+
 @workdays_bp.route("/workdays/<int:workday_id>/tasks", methods=["GET"])
 def get_workday_tasks(workday_id):
     """Return pending/in-progress tasks for a given workday."""

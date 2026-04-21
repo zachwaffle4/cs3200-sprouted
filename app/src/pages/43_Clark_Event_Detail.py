@@ -1,6 +1,12 @@
-import streamlit as st
+import logging
 import requests
-#from modules.nav import SideBarLinks
+import streamlit as st
+from modules.nav import SideBarLinks
+logger = logging.getLogger(__name__)
+
+st.set_page_config(layout='wide')
+
+SideBarLinks()
 
 API_BASE = "http://web-api:4000"
 
@@ -62,8 +68,6 @@ def signup_for_task(workday_id, task_id, volunteer_id):
         return False
 
 st.set_page_config(page_title="Event Detail – Sprouted", layout="wide")
-
-#SideBarLinks()
 
 st.markdown("""
 <style>

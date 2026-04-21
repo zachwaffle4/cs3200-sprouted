@@ -1,7 +1,13 @@
-import streamlit as st
+import logging
 import requests
+import streamlit as st
 from datetime import datetime, date
-#from modules.nav import SideBarLinks
+from modules.nav import SideBarLinks
+logger = logging.getLogger(__name__)
+
+st.set_page_config(layout='wide')
+
+SideBarLinks()
 
 API_BASE = "http://web-api:4000"
 
@@ -39,8 +45,6 @@ def cancel_signup(signup_id):
         return False
 
 st.set_page_config(page_title="My Volunteer Hours – Sprouted", layout="wide")
-
-#SideBarLinks()
 
 st.markdown("""
 <style>
