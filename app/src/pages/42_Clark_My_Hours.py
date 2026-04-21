@@ -9,7 +9,7 @@ st.set_page_config(layout='wide')
 
 SideBarLinks()
 
-API_BASE = "http://localhost:4001/api"
+API_BASE = "http://web-api:4000"
 
 def get_volunteer_log(volunteer_id):
     try:

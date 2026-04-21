@@ -8,15 +8,43 @@ st.set_page_config(layout='wide')
 
 SideBarLinks()
 
-API_BASE = "http://localhost:4001/api"
+API_BASE = "http://web-api:4000"
 
 def get_workdays():
     try:
         r = requests.get(f"{API_BASE}/workdays")
         if r.status_code == 200:
-            return r.json()
-    except Exception:
-        pass
+            workdays = r.json()
+            result = []
+            for w in workdays:
+                tasks = []
+                try:
+                    tasks_r = requests.get(f"{API_BASE}/workdays/{w['workday_id']}/tasks")
+                    if tasks_r.status_code == 200:
+                        for t in tasks_r.json():
+                            tasks.append({
+                                "id": t["task_id"],
+                                "name": t["task_description"],
+                                "hours": 2.0,
+                                "spots_left": 1,
+                                "full": t.get("status") == "completed",
+                            })
+                except Exception:
+                    pass
+                result.append({
+                    "id": w["workday_id"],
+                    "title": w["event_name"],
+                    "date": w["event_date"],
+                    "time": "",
+                    "location": f"Site {w['site_id']}",
+                    "signed_up": w["signup_count"],
+                    "capacity": w["volunteers_needed"],
+                    "needs_help": w["spots_remaining"] < 5,
+                    "tasks": tasks,
+                })
+            return result
+    except Exception as e:
+        st.warning(f"API error: {e}")
     return [
         {
             "id": 1,
@@ -53,7 +81,7 @@ def signup_for_task(workday_id, task_id, volunteer_id):
     try:
         r = requests.post(
             f"{API_BASE}/workdays/{workday_id}/signups",
-            json={"task_id": task_id, "volunteer_id": volunteer_id},
+            json={"user_id": volunteer_id},
         )
         return r.status_code in (200, 201)
     except Exception:
