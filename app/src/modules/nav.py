@@ -62,7 +62,17 @@ def volunteer_event_detail_nav():
 
 
 # ---- Role: food_bank_coordinator ----------------------------------------------------
-# TODO: add food bank coordinator links here + update method names
+
+def lucia_dashboard_nav():
+    st.sidebar.page_link("pages/50_Lucia_Dashboard.py", label="Dashboard", icon="📊")
+
+
+def lucia_browse_nav():
+    st.sidebar.page_link("pages/51_Lucia_Browse_Surplus.py", label="Browse Surplus", icon="🥦")
+
+
+def lucia_requests_nav():
+    st.sidebar.page_link("pages/52_Lucia_My_Requests.py", label="My Requests", icon="📋")
 
 
 # ---- Sidebar assembly -------------------------------------------------------
@@ -102,7 +112,9 @@ def SideBarLinks(show_home=False):
             volunteer_event_detail_nav()
 
         if st.session_state["role"] == "food_bank_coordinator":
-            pass  # TODO: add food bank coordinator nav calls here
+            lucia_dashboard_nav()
+            lucia_browse_nav()
+            lucia_requests_nav()
 
     # About link appears at the bottom for all roles
     about_page_nav()
