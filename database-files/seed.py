@@ -16,6 +16,8 @@ Faker.seed(42)
 random.seed(42)
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../api/.env"))
+if not os.environ.get("MYSQL_ROOT_PASSWORD"):
+    load_dotenv(os.path.join(os.path.dirname(__file__), "/apicode/.env"))
 
 roles = ["volunteer", "admin", "coordinator", "gardener"]
 orgTypes = ["Food Bank", "Shelter", "School", "Restaurant", "Community Center"]
@@ -101,11 +103,11 @@ def mysqlConnector() -> None:
     global MySQL
     global db
     db = mysql.connector.connect(
-        host="localhost",
-        port=os.environ.get("DB_PORT", "3200"),
+        host=os.environ.get("DB_HOST", "db"),
+        port=os.environ.get("DB_PORT", "3306"),
         user=os.environ.get("DB_USER", "root"),
         password=os.environ.get("MYSQL_ROOT_PASSWORD", ""),
-        database=os.environ.get("DB_NAME", "Sprouted"),
+        database=os.environ.get("DB_NAME", "sprouted"),
     )
     MySQL = db.cursor()
 
