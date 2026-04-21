@@ -4,56 +4,53 @@ from modules.nav import SideBarLinks
 
 API_BASE = "http://api:4000"
 
-def get_surplus_listings(crop_type=None, garden_site=None, min_qty=None):
+def get_surplus_listings():
     try:
-        params = {}
-        if crop_type and crop_type != "All types":
-            params["crop_type"] = crop_type
-        # Backend uses 'min_quantity' instead of 'min_qty'
-        if min_qty:
-            params["min_quantity"] = min_qty
-        if garden_site and garden_site != "All sites":
-            params["site_name"] = garden_site
-        
-        r = req.get(f"{API_BASE}/surplus", params=params)
+        r = req.get(f"{API_BASE}/surplus")
         if r.status_code == 200:
             listings = r.json()
-            # Transform to match frontend expectations
-            formatted = []
+            result = []
             for l in listings:
-                formatted.append({
-                    "id": l.get('listing_id'),
-                    "crop": l.get('crop_name'),
-                    "type": l.get('crop_type'),
-                    "lbs": l.get('quantity_lbs'),
-                    "site": l.get('site_name'),
-                    "plot": f"Plot {l.get('plot_id')}",
-                    "owner": "Owner", # Backend doesn't return owner name here
-                    "date": l.get('listed_date'),
-                    "status": l.get('status')
+                result.append({
+                    "id": l.get("listing_id"),
+                    "crop": l.get("crop_name", f"Crop {l.get('crop_id', '?')}"),
+                    "type": l.get("crop_type", "Vegetable"),
+                    "lbs": l.get("quantity_lbs", 0),
+                    "site": l.get("site_name", f"Site {l.get('site_id', '?')}"),
+                    "plot": l.get("plot_name", f"Plot {l.get('plot_id', '?')}"),
+                    "date": str(l.get("listed_date", "")),
+                    "status": l.get("status", "available"),
                 })
-            return formatted
-    except Exception as e:
-        st.error(f"Error fetching surplus: {e}")
-    return []
+            return result
+    except Exception:
+        pass
+    return [
+        {"id": 1, "crop": "Roma tomatoes", "type": "Vegetable", "lbs": 12,
+         "site": "Elm Street Garden", "plot": "Plot 14", "date": "Mar 24", "status": "available"},
+        {"id": 2, "crop": "Sweet basil", "type": "Herb", "lbs": 3,
+         "site": "Riverside Plots", "plot": "Plot 3", "date": "Mar 23", "status": "available"},
+        {"id": 3, "crop": "Zucchini", "type": "Vegetable", "lbs": 8,
+         "site": "MLK Community Farm", "plot": "Plot 7", "date": "Mar 22", "status": "available"},
+        {"id": 4, "crop": "Jalapeño peppers", "type": "Vegetable", "lbs": 5,
+         "site": "Elm Street Garden", "plot": "Plot 22", "date": "Mar 25", "status": "available"},
+        {"id": 5, "crop": "Collard greens", "type": "Vegetable", "lbs": 6,
+         "site": "Riverside Plots", "plot": "Plot 11", "date": "Mar 20", "status": "pending"},
+    ]
 
-def request_pickup(surplus_id, food_bank_id, preferred_date):
+def request_pickup(listing_id, org_id, preferred_date):
     try:
-        # Backend expects org_id, listing_id, preferred_pickup_date
-        payload = {
-            "org_id": food_bank_id,
-            "listing_id": surplus_id,
-            "preferred_pickup_date": preferred_date
-        }
-        r = req.post(f"{API_BASE}/surplus/requests", json=payload)
-        return r.status_code in (200, 201)
-    except Exception as e:
-        st.error(f"Error requesting pickup: {e}")
-        return False
+        r = req.post(
+            f"{API_BASE}/surplus/requests",
+            json={"org_id": org_id, "listing_id": listing_id, "preferred_pickup_date": preferred_date}
+        )
+        if r.status_code in (200, 201):
+            return True, r.json().get("request_id")
+        return False, None
+    except Exception:
+        return False, None
 
 def cancel_request(request_id):
     try:
-        # Backend expects request_id in path
         r = req.delete(f"{API_BASE}/surplus/requests/{request_id}")
         return r.status_code in (200, 204)
     except Exception as e:
@@ -66,13 +63,6 @@ SideBarLinks()
 
 st.markdown("""
 <style>
-    .listing-card {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 14px 16px;
-        margin-bottom: 10px;
-        background: #fff;
-    }
     .crop-title { font-size: 15px; font-weight: 600; }
     .crop-sub { font-size: 12px; color: #888; margin-top: 2px; }
     .tag {
@@ -91,7 +81,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 user = st.session_state.get("user", {"id": 1, "name": "Lucia Tran"})
-food_bank_id = user.get("id", 1)
+org_id = user.get("id", 1)
 
 st.title("Browse surplus produce")
 st.caption("View available surplus from all partner gardens")
@@ -106,52 +96,57 @@ with f3:
 with f4:
     min_qty = st.number_input("Min qty (lbs)", min_value=0, value=0, label_visibility="collapsed")
 with f5:
-    filter_btn = st.button("Filter")
+    st.button("Filter")
 
-listings = get_surplus_listings(crop_type, garden_site, min_qty if min_qty > 0 else None)
+listings = get_surplus_listings()
 
 if search:
     listings = [l for l in listings if search.lower() in l["crop"].lower()]
-if garden_site and garden_site != "All sites":
-    listings = [l for l in listings if l["site"] == garden_site]
+if crop_type != "All types":
+    listings = [l for l in listings if l.get("type") == crop_type]
+if min_qty > 0:
+    listings = [l for l in listings if l.get("lbs", 0) >= min_qty]
 
 st.caption(f"Showing {len(listings)} available listings")
 
-requested = st.session_state.get("requested_surplus", set())
+requested = st.session_state.get("requested_surplus", {})
 
 for listing in listings:
     col_main, col_action = st.columns([4, 1])
 
-    tag_class = "tag-herb" if listing["type"] == "Herb" else "tag-veg"
-    pending_tag = '<span class="tag tag-pending">Pickup pending</span>' if listing["status"] == "pending" else ""
+    tag_class = "tag-herb" if listing.get("type") == "Herb" else "tag-veg"
+    pending_tag = '<span class="tag tag-pending">Pickup pending</span>' if listing.get("status") == "pending" else ""
 
     with col_main:
         st.markdown(f"""
         <div style="margin-bottom:4px;">
             <span class="crop-title">{listing['crop']}</span>
-            <span class="tag {tag_class}">{listing['type']}</span>
+            <span class="tag {tag_class}">{listing.get('type', 'Produce')}</span>
             {pending_tag}
         </div>
-        <div class="crop-sub">{listing['site']} · {listing['plot']} · {listing['owner']} · {listing['date']}</div>
+        <div class="crop-sub">{listing['site']} · {listing['plot']} · {listing['date']}</div>
         """, unsafe_allow_html=True)
 
     with col_action:
         st.markdown(f'<div class="lbs-label">{listing["lbs"]} lbs</div>', unsafe_allow_html=True)
-        if listing["status"] == "pending" or listing["id"] in requested:
-            if st.button("Cancel request", key=f"cancel_{listing['id']}", type="secondary"):
-                ok = cancel_request(listing["id"])
+        listing_id = listing["id"]
+
+        if listing.get("status") == "pending" or listing_id in requested:
+            req_id = requested.get(listing_id)
+            if st.button("Cancel request", key=f"cancel_{listing_id}", type="secondary"):
+                ok = cancel_request(req_id) if req_id else False
                 if ok:
-                    requested.discard(listing["id"])
+                    del requested[listing_id]
                     st.session_state["requested_surplus"] = requested
                     st.success("Request cancelled.")
                     st.rerun()
                 else:
                     st.error("Could not cancel. Please try again.")
         else:
-            if st.button("Request pickup", key=f"request_{listing['id']}"):
-                ok = request_pickup(listing["id"], food_bank_id, "2026-04-01")
+            if st.button("Request pickup", key=f"request_{listing_id}"):
+                ok, req_id = request_pickup(listing_id, org_id, "2026-05-01")
                 if ok:
-                    requested.add(listing["id"])
+                    requested[listing_id] = req_id
                     st.session_state["requested_surplus"] = requested
                     st.success(f"Pickup requested for {listing['crop']}!")
                     st.rerun()

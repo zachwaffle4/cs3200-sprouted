@@ -151,3 +151,37 @@ def cancel_pickup_request(request_id):
         return jsonify({"error": str(e)}), 500
     finally:
         cursor.close()
+
+
+@surplus_bp.route("/surplus/requests", methods=["GET"])
+def get_pickup_requests():
+    """Return all pickup requests with crop and site info."""
+    cursor = get_db().cursor(dictionary=True)
+    try:
+        query = """
+            SELECT
+                pr.request_id,
+                pr.org_id,
+                pr.listing_id,
+                pr.requested_date,
+                pr.preferred_pickup_date,
+                pr.status,
+                c.crop_name,
+                c.crop_type,
+                sl.quantity_lbs,
+                p.name AS plot_name,
+                gs.site_name
+            FROM Produce_Request pr
+            JOIN Surplus_Listing sl ON sl.listing_id = pr.listing_id
+            JOIN Crop c ON c.crop_id = sl.crop_id
+            JOIN Plot p ON p.plot_id = sl.plot_id
+            JOIN Garden_Site gs ON gs.site_id = p.site_id
+            ORDER BY pr.requested_date DESC
+        """
+        cursor.execute(query)
+        return jsonify(cursor.fetchall()), 200
+    except Error as e:
+        current_app.logger.error(f"Error fetching pickup requests: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        cursor.close()

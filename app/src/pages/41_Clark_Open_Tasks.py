@@ -8,42 +8,74 @@ st.set_page_config(layout='wide')
 
 SideBarLinks()
 
-API_BASE = "http://api:4000"
+API_BASE = "http://web-api:4000"
 
 def get_workdays():
     try:
         r = requests.get(f"{API_BASE}/workdays")
         if r.status_code == 200:
             workdays = r.json()
-            # Transform API response to match frontend expectations if necessary
-            for wd in workdays:
-                wd['id'] = wd.get('workday_id')
-                wd['title'] = wd.get('event_name')
-                wd['date'] = wd.get('event_date')
-                wd['time'] = "" # Backend doesn't return time in this format yet
-                wd['location'] = f"Site {wd.get('site_id')}" # Site name needs another join or lookup
-                wd['signed_up'] = wd.get('signup_count', 0)
-                wd['capacity'] = wd.get('volunteers_needed', 0)
-                wd['needs_help'] = wd.get('spots_remaining', 0) > 0
-                
-                # Fetch tasks for each workday
-                tasks_r = requests.get(f"{API_BASE}/workdays/{wd['id']}/tasks")
-                if tasks_r.status_code == 200:
-                    wd['tasks'] = []
-                    for t in tasks_r.json():
-                        wd['tasks'].append({
-                            "id": t['task_id'],
-                            "name": t['task_description'],
-                            "hours": 2.0, # Defaulting hours since it's not in DB
-                            "spots_left": 1 if t['status'] == 'pending' else 0,
-                            "full": t['status'] != 'pending'
-                        })
-                else:
-                    wd['tasks'] = []
-            return workdays
+            result = []
+            for w in workdays:
+                tasks = []
+                try:
+                    tasks_r = requests.get(f"{API_BASE}/workdays/{w['workday_id']}/tasks")
+                    if tasks_r.status_code == 200:
+                        for t in tasks_r.json():
+                            tasks.append({
+                                "id": t["task_id"],
+                                "name": t["task_description"],
+                                "hours": 2.0,
+                                "spots_left": 1,
+                                "full": t.get("status") == "completed",
+                            })
+                except Exception:
+                    pass
+                result.append({
+                    "id": w["workday_id"],
+                    "title": w["event_name"],
+                    "date": w["event_date"],
+                    "time": "",
+                    "location": f"Site {w['site_id']}",
+                    "signed_up": w["signup_count"],
+                    "capacity": w["volunteers_needed"],
+                    "needs_help": w["spots_remaining"] < 5,
+                    "tasks": tasks,
+                })
+            return result
     except Exception as e:
-        logger.error(f"Error fetching workdays: {e}")
-    return []
+        st.warning(f"API error: {e}")
+    return [
+        {
+            "id": 1,
+            "title": "Fall Cleanup",
+            "date": "Nov 1, 2026",
+            "time": "9:00 AM",
+            "location": "Elm Street Garden",
+            "signed_up": 8,
+            "capacity": 12,
+            "needs_help": False,
+            "tasks": [
+                {"id": 10, "name": "Bed Weeding", "hours": 2.0, "spots_left": 1, "full": False},
+                {"id": 11, "name": "Compost Turning", "hours": 2.0, "spots_left": 0, "full": True},
+                {"id": 12, "name": "Path Raking", "hours": 1.5, "spots_left": 3, "full": False},
+            ],
+        },
+        {
+            "id": 2,
+            "title": "Fall Greenhouse Prep",
+            "date": "Nov 10, 2026",
+            "time": "9:00 AM",
+            "location": "Elm Street Garden",
+            "signed_up": 3,
+            "capacity": 12,
+            "needs_help": True,
+            "tasks": [
+                {"id": 20, "name": "Winter Seedling Potting", "hours": 2.0, "spots_left": 4, "full": False},
+                {"id": 21, "name": "Drip Line Inspection", "hours": 2.0, "spots_left": 4, "full": False},
+            ],
+        },
+    ]
 
 def signup_for_task(workday_id, task_id, volunteer_id):
     try:

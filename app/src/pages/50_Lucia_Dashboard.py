@@ -81,11 +81,11 @@ def get_dashboard_data(food_bank_id, season="2026", compare_to="2025"):
             {"crop": "Other (10 types)", "lbs": 217, "pct": 26},
         ],
     }
- 
+
 st.set_page_config(page_title="Dashboard – Sprouted", layout="wide")
- 
+
 SideBarLinks()
- 
+
 st.markdown("""
 <style>
     .metric-card {
@@ -112,24 +112,24 @@ st.markdown("""
     .crop-pct { font-size: 11px; color: #888; width: 60px; text-align: right; }
 </style>
 """, unsafe_allow_html=True)
- 
+
 user = st.session_state.get("user", {"id": 1, "name": "Lucia Tran"})
 food_bank_id = user.get("id", 1)
- 
+
 st.title("Dashboard")
 st.caption("Donation tracking and seasonal reporting")
- 
+
 col1, col2 = st.columns(2)
 with col1:
-    season = st.selectbox("Time range", ["Current season (2026)", "Last 6 months", "Last 12 months"], label_visibility="visible")
+    season = st.selectbox("Time range", ["Current season (2026)", "Last 6 months", "Last 12 months"])
 with col2:
-    compare_to = st.selectbox("Compare to", ["Previous season (2025)", "Two seasons ago (2024)"], label_visibility="visible")
- 
+    compare_to = st.selectbox("Compare to", ["Previous season (2025)", "Two seasons ago (2024)"])
+
 season_val = "2026" if "2026" in season else "2025"
 compare_val = "2025" if "2025" in compare_to else "2024"
- 
+
 data = get_dashboard_data(food_bank_id, season_val, compare_val)
- 
+
 st.markdown("")
 c1, c2, c3, c4 = st.columns(4)
 with c1:
@@ -160,24 +160,24 @@ with c4:
         <div class="metric-value">{data['crop_varieties']}</div>
         <div class="metric-change-pos">+{data['crop_varieties_change']} vs {compare_val}</div>
     </div>""", unsafe_allow_html=True)
- 
+
 st.markdown("")
 st.subheader("Monthly produce received (lbs)")
- 
+
 months = data["monthly_data"]["months"]
 current = data["monthly_data"]["current"]
 previous = data["monthly_data"]["previous"]
- 
+
 import pandas as pd
 chart_data = pd.DataFrame({
     str(season_val): current,
     str(compare_val): previous,
 }, index=months)
 st.bar_chart(chart_data, height=250)
- 
+
 st.markdown("")
 col_left, col_right = st.columns(2)
- 
+
 with col_left:
     st.subheader("Top contributing sites")
     for site in data["top_sites"]:
@@ -189,7 +189,7 @@ with col_left:
             </div>
             <div class="site-lbs">{site['lbs']} lbs</div>
         </div>""", unsafe_allow_html=True)
- 
+
 with col_right:
     st.subheader("Breakdown by crop type")
     for crop in data["crop_breakdown"]:
