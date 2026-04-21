@@ -15,7 +15,9 @@ services:
     build: ./api
     container_name: web-api
     hostname: web-api
-    volumes: ["./api:/apicode"]
+    volumes: 
+      - "./api:/apicode"
+      - "./database-files:/database-files"
     environment:
       - WATCHPACK_POLLING=true
     ports:

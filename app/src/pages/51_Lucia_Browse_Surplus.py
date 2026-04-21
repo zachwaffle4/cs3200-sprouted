@@ -1,8 +1,8 @@
-import streamlit as st
+﻿import streamlit as st
 import requests as req
 from modules.nav import SideBarLinks
 
-API_BASE = "http://api:4000"
+API_BASE = "http://web-api:4000"
 
 def get_surplus_listings():
     try:
@@ -31,10 +31,13 @@ def get_surplus_listings():
          "site": "Riverside Plots", "plot": "Plot 3", "date": "Mar 23", "status": "available"},
         {"id": 3, "crop": "Zucchini", "type": "Vegetable", "lbs": 8,
          "site": "MLK Community Farm", "plot": "Plot 7", "date": "Mar 22", "status": "available"},
+<<<<<<< shloka-persona3
         {"id": 4, "crop": "Jalapeño peppers", "type": "Vegetable", "lbs": 5,
          "site": "Elm Street Garden", "plot": "Plot 22", "date": "Mar 25", "status": "available"},
         {"id": 5, "crop": "Collard greens", "type": "Vegetable", "lbs": 6,
          "site": "Riverside Plots", "plot": "Plot 11", "date": "Mar 20", "status": "pending"},
+=======
+>>>>>>> main
     ]
 
 def request_pickup(listing_id, org_id, preferred_date):
@@ -53,14 +56,13 @@ def cancel_request(request_id):
     try:
         r = req.delete(f"{API_BASE}/surplus/requests/{request_id}")
         return r.status_code in (200, 204)
-    except Exception as e:
-        st.error(f"Error cancelling request: {e}")
+    except Exception:
         return False
 
-st.set_page_config(page_title="Browse Surplus – Sprouted", layout="wide")
-
+st.set_page_config(page_title="Browse Surplus - Sprouted", layout="wide")
 SideBarLinks()
 
+<<<<<<< shloka-persona3
 st.markdown("""
 <style>
     .crop-title { font-size: 15px; font-weight: 600; }
@@ -80,6 +82,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+=======
+>>>>>>> main
 user = st.session_state.get("user", {"id": 1, "name": "Lucia Tran"})
 org_id = user.get("id", 1)
 
@@ -113,13 +117,19 @@ requested = st.session_state.get("requested_surplus", {})
 
 for listing in listings:
     col_main, col_action = st.columns([4, 1])
+<<<<<<< shloka-persona3
 
     tag_class = "tag-herb" if listing.get("type") == "Herb" else "tag-veg"
     pending_tag = '<span class="tag tag-pending">Pickup pending</span>' if listing.get("status") == "pending" else ""
+=======
+    tag_class = "tag-herb" if listing.get("type") == "Herb" else "tag-veg"
+    pending_tag = '<span style="background:#fff3e0;color:#e65100;border-radius:4px;padding:2px 8px;font-size:11px">Pickup pending</span>' if listing.get("status") == "pending" else ""
+>>>>>>> main
 
     with col_main:
         st.markdown(f"""
         <div style="margin-bottom:4px;">
+<<<<<<< shloka-persona3
             <span class="crop-title">{listing['crop']}</span>
             <span class="tag {tag_class}">{listing.get('type', 'Produce')}</span>
             {pending_tag}
@@ -131,6 +141,18 @@ for listing in listings:
         st.markdown(f'<div class="lbs-label">{listing["lbs"]} lbs</div>', unsafe_allow_html=True)
         listing_id = listing["id"]
 
+=======
+            <span style="font-size:15px;font-weight:600">{listing['crop']}</span>
+            <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;margin-left:6px;background:{'#e3f2fd' if listing.get('type')=='Herb' else '#e8f5e9'};color:{'#1565c0' if listing.get('type')=='Herb' else '#2d6a2d'}">{listing.get('type','Produce')}</span>
+            {pending_tag}
+        </div>
+        <div style="font-size:12px;color:#888">{listing['site']} · {listing['plot']} · {listing['date']}</div>
+        """, unsafe_allow_html=True)
+
+    with col_action:
+        st.markdown(f'<div style="font-size:16px;font-weight:700;color:#1a3a1a">{listing["lbs"]} lbs</div>', unsafe_allow_html=True)
+        listing_id = listing["id"]
+>>>>>>> main
         if listing.get("status") == "pending" or listing_id in requested:
             req_id = requested.get(listing_id)
             if st.button("Cancel request", key=f"cancel_{listing_id}", type="secondary"):
@@ -141,7 +163,7 @@ for listing in listings:
                     st.success("Request cancelled.")
                     st.rerun()
                 else:
-                    st.error("Could not cancel. Please try again.")
+                    st.error("Could not cancel.")
         else:
             if st.button("Request pickup", key=f"request_{listing_id}"):
                 ok, req_id = request_pickup(listing_id, org_id, "2026-05-01")
@@ -151,8 +173,12 @@ for listing in listings:
                     st.success(f"Pickup requested for {listing['crop']}!")
                     st.rerun()
                 else:
-                    st.error("Request failed. Please try again.")
+                    st.error("Request failed.")
 
     st.divider()
 
+<<<<<<< shloka-persona3
 st.caption(f"1–{len(listings)} of {len(listings)} listings")
+=======
+st.caption(f"1-{len(listings)} of {len(listings)} listings")
+>>>>>>> main

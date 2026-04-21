@@ -5,11 +5,12 @@ from datetime import date
 from modules.nav import SideBarLinks
 
 logger = logging.getLogger(__name__)
-st.set_page_config(layout='wide')
+st.set_page_config(layout="wide")
 SideBarLinks()
 
 API_BASE = "http://api:4000"
 MARIA_USER_ID = 5
+
 
 # API helper functions
 def api_get(path, params=None):
@@ -21,6 +22,7 @@ def api_get(path, params=None):
         logger.error("GET %s failed: %s", path, e)
         return None
 
+
 def api_post(path, payload):
     try:
         r = requests.post(f"{API_BASE}{path}", json=payload, timeout=5)
@@ -29,6 +31,7 @@ def api_post(path, payload):
     except Exception as e:
         logger.error("POST %s failed: %s", path, e)
         return None
+
 
 def api_delete(path):
     try:
@@ -61,7 +64,9 @@ if not plot_options:
 
 # Section 1: Log new entry
 st.subheader("New Entry")
-st.caption("Select 'Planting' to record what you just planted, or 'Harvest' to record what you picked.")
+st.caption(
+    "Select 'Planting' to record what you just planted, or 'Harvest' to record what you picked."
+)
 
 with st.form("log_activity_form"):
     entry_type = st.radio(

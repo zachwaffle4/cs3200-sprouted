@@ -39,8 +39,6 @@ def get_my_requests(org_id):
                 return result
     except Exception:
         pass
-    except Exception as e:
-        st.error(f"Error: {e}")
     return [
         {"id": 101, "crop": "Roma tomatoes", "type": "Vegetable", "lbs": 12,
          "site": "Elm Street Garden", "plot": "Plot 14", "preferred_date": "Apr 1, 2026",

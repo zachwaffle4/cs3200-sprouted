@@ -99,7 +99,9 @@ def delete_workday(workday_id):
     """
     cursor = get_db().cursor()
     try:
-        cursor.execute("SELECT workday_id FROM Workday WHERE workday_id = %s", (workday_id,))
+        cursor.execute(
+            "SELECT workday_id FROM Workday WHERE workday_id = %s", (workday_id,)
+        )
         if not cursor.fetchone():
             return jsonify({"error": "Workday not found"}), 404
 

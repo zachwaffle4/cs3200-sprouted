@@ -138,7 +138,10 @@ def promote_from_waitlist(application_id):
             """)
             row = cursor.fetchone()
             if not row:
-                return jsonify({"error": "No vacant plots available for promotion"}), 409
+                return (
+                    jsonify({"error": "No vacant plots available for promotion"}),
+                    409,
+                )
             plot_id = row["plot_id"]
 
         # Guard: make sure the target plot is still vacant
@@ -164,11 +167,16 @@ def promote_from_waitlist(application_id):
             (application_id,),
         )
         get_db().commit()
-        return jsonify({
-            "message": "Applicant promoted to plot owner",
-            "assignment_id": assignment_id,
-            "plot_id": plot_id,
-        }), 200
+        return (
+            jsonify(
+                {
+                    "message": "Applicant promoted to plot owner",
+                    "assignment_id": assignment_id,
+                    "plot_id": plot_id,
+                }
+            ),
+            200,
+        )
     except Error as e:
         current_app.logger.error(f"Error promoting from waitlist: {e}")
         return jsonify({"error": str(e)}), 500

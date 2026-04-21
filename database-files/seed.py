@@ -15,7 +15,9 @@ fake = Faker()
 Faker.seed(42)
 random.seed(42)
 
-load_dotenv(os.path.join(os.path.dirname(__file__), '../api/.env'))
+load_dotenv(os.path.join(os.path.dirname(__file__), "../api/.env"))
+if not os.environ.get("MYSQL_ROOT_PASSWORD"):
+    load_dotenv(os.path.join(os.path.dirname(__file__), "/apicode/.env"))
 
 roles = ["volunteer", "admin", "coordinator", "gardener"]
 orgTypes = ["Food Bank", "Shelter", "School", "Restaurant", "Community Center"]
@@ -27,13 +29,26 @@ urgencies = ["low", "medium", "high"]
 taskStatus = ["pending", "in progress", "completed"]
 
 cropData = [
-("Tomato", "Vegetable"), ("Basil", "Herb"), ("Lettuce", "Vegetable"),
-("Carrot", "Vegetable"), ("Pepper", "Vegetable"), ("Kale", "Vegetable"),
-("Cilantro", "Herb"), ("Squash", "Vegetable"), ("Cucumber", "Vegetable"),
-("Strawberry", "Fruit"), ("Mint", "Herb"), ("Zucchini", "Vegetable"),
-("Spinach", "Vegetable"), ("Radish", "Vegetable"), ("Green Bean", "Vegetable"),
-("Rosemary", "Herb"), ("Blueberry", "Fruit"), ("Corn", "Vegetable"),
-("Pumpkin", "Vegetable"), ("Thyme", "Herb")
+    ("Tomato", "Vegetable"),
+    ("Basil", "Herb"),
+    ("Lettuce", "Vegetable"),
+    ("Carrot", "Vegetable"),
+    ("Pepper", "Vegetable"),
+    ("Kale", "Vegetable"),
+    ("Cilantro", "Herb"),
+    ("Squash", "Vegetable"),
+    ("Cucumber", "Vegetable"),
+    ("Strawberry", "Fruit"),
+    ("Mint", "Herb"),
+    ("Zucchini", "Vegetable"),
+    ("Spinach", "Vegetable"),
+    ("Radish", "Vegetable"),
+    ("Green Bean", "Vegetable"),
+    ("Rosemary", "Herb"),
+    ("Blueberry", "Fruit"),
+    ("Corn", "Vegetable"),
+    ("Pumpkin", "Vegetable"),
+    ("Thyme", "Herb"),
 ]
 
 numSites = 100
@@ -42,8 +57,18 @@ numUser = 100
 numOrgs = 100
 numPlots = 100
 
-plot_names = ["Bed A", "Bed B", "Bed C", "Bed D", "North Plot", "South Plot",
-            "Herb Spiral", "Raised Bed 1", "Raised Bed 2", "Greenhouse Row"]
+plot_names = [
+    "Bed A",
+    "Bed B",
+    "Bed C",
+    "Bed D",
+    "North Plot",
+    "South Plot",
+    "Herb Spiral",
+    "Raised Bed 1",
+    "Raised Bed 2",
+    "Greenhouse Row",
+]
 
 numWorkDays = 100
 numSchedules = 100
@@ -57,30 +82,37 @@ numPickups = 1
 
 numTasks = 100
 task_descriptions = [
-    "Weed the raised beds", "Spread mulch along pathways",
-    "Set up irrigation lines", "Plant seedlings in Bed A",
-    "Harvest ripe tomatoes", "Repair fence on north side",
-    "Turn compost bins", "Clear debris after storm",
-    "Install new row covers", "Label all crop rows",
+    "Weed the raised beds",
+    "Spread mulch along pathways",
+    "Set up irrigation lines",
+    "Plant seedlings in Bed A",
+    "Harvest ripe tomatoes",
+    "Repair fence on north side",
+    "Turn compost bins",
+    "Clear debris after storm",
+    "Install new row covers",
+    "Label all crop rows",
 ]
 
 numSignUps = 100
 numLogs = 100
 numApplications = 15
 
-def mysqlConnector () -> None: 
+
+def mysqlConnector() -> None:
     global MySQL
-    global db 
+    global db
     db = mysql.connector.connect(
-        host = "localhost",
-        port = os.environ.get("DB_PORT", "3200"),
-        user = os.environ.get("DB_USER", "root"),
-        password = os.environ.get("MYSQL_ROOT_PASSWORD", ""),
-        database = os.environ.get("DB_NAME", "Sprouted"),
+        host=os.environ.get("DB_HOST", "db"),
+        port=os.environ.get("DB_PORT", "3306"),
+        user=os.environ.get("DB_USER", "root"),
+        password=os.environ.get("MYSQL_ROOT_PASSWORD", ""),
+        database=os.environ.get("DB_NAME", "sprouted"),
     )
     MySQL = db.cursor()
 
-def seedSites (numSites: int) -> None:
+
+def seedSites(numSites: int) -> None:
     for _ in range(numSites):
         MySQL.execute(
             "INSERT INTO Garden_Site (site_name, street, city, state, zip) VALUES (%s,%s,%s,%s,%s)",
@@ -94,7 +126,8 @@ def seedSites (numSites: int) -> None:
         )
     db.commit()
 
-def seedCropData (cropData : List[tuple]) -> None:
+
+def seedCropData(cropData: List[tuple]) -> None:
     for name, ctype in cropData:
         MySQL.execute(
             "INSERT INTO Crop (crop_name, crop_type) VALUES (%s,%s)",
@@ -102,7 +135,8 @@ def seedCropData (cropData : List[tuple]) -> None:
         )
     db.commit()
 
-def seedUsers (numUser: int) -> None:
+
+def seedUsers(numUser: int) -> None:
     for _ in range(numUser):
         MySQL.execute(
             "INSERT INTO User (role, email, phone, first_name, last_name) VALUES (%s,%s,%s,%s,%s)",
@@ -116,7 +150,8 @@ def seedUsers (numUser: int) -> None:
         )
     db.commit()
 
-def seedOrgs (numOrgs: int) -> None :
+
+def seedOrgs(numOrgs: int) -> None:
     for _ in range(numOrgs):
         MySQL.execute(
             """INSERT INTO Organization
@@ -133,7 +168,8 @@ def seedOrgs (numOrgs: int) -> None :
         )
     db.commit()
 
-def seedPlots (numPlots : int) -> None:
+
+def seedPlots(numPlots: int) -> None:
     for _ in range(numPlots):
         MySQL.execute(
             "INSERT INTO Plot (name, site_id) VALUES (%s,%s)",
@@ -144,7 +180,8 @@ def seedPlots (numPlots : int) -> None:
         )
     db.commit()
 
-def seedWorkDays (numWorkDays: int) -> None: 
+
+def seedWorkDays(numWorkDays: int) -> None:
     for _ in range(numWorkDays):
         event_date = fake.date_between(start_date="-60d", end_date="+30d")
         start_hour = random.randint(7, 12)
@@ -164,7 +201,8 @@ def seedWorkDays (numWorkDays: int) -> None:
         )
     db.commit()
 
-def seedSchedules (numSchedules: int) -> None: 
+
+def seedSchedules(numSchedules: int) -> None:
     for _ in range(numSchedules):
         MySQL.execute(
             """INSERT INTO Watering_Schedule
@@ -181,7 +219,8 @@ def seedSchedules (numSchedules: int) -> None:
         )
     db.commit()
 
-def seedHarvest (numHarvests : int) -> None:
+
+def seedHarvest(numHarvests: int) -> None:
     for _ in range(numHarvests):
         MySQL.execute(
             """INSERT INTO Harvest (plot_id, crop_id, harvest_date, quantity_lbs)
@@ -195,7 +234,8 @@ def seedHarvest (numHarvests : int) -> None:
         )
     db.commit()
 
-def seedPestReports (numPestReports : int) -> None:
+
+def seedPestReports(numPestReports: int) -> None:
     for _ in range(numPestReports):
         MySQL.execute(
             """INSERT INTO Pest_Report
@@ -213,10 +253,15 @@ def seedPestReports (numPestReports : int) -> None:
         )
     db.commit()
 
-def seedAssignments (numAssignments : int) -> None:
+
+def seedAssignments(numAssignments: int) -> None:
     for _ in range(numAssignments):
         assigned = fake.date_between(start_date="-120d", end_date="today")
-        end = assigned + timedelta(days=random.randint(30, 180)) if random.random() > 0.3 else None
+        end = (
+            assigned + timedelta(days=random.randint(30, 180))
+            if random.random() > 0.3
+            else None
+        )
         MySQL.execute(
             """INSERT INTO Plot_Assignment (plot_id, user_id, assigned_date, end_date)
             VALUES (%s,%s,%s,%s)""",
@@ -228,6 +273,7 @@ def seedAssignments (numAssignments : int) -> None:
             ),
         )
     db.commit()
+
 
 def seedYieldPairs(pairs: int) -> None:
     yield_pairs = set()
@@ -241,7 +287,8 @@ def seedYieldPairs(pairs: int) -> None:
         )
     db.commit()
 
-def seedListing (numListings : int) -> None: 
+
+def seedListing(numListings: int) -> None:
     for _ in range(numListings):
         MySQL.execute(
             """INSERT INTO Surplus_Listing
@@ -252,14 +299,22 @@ def seedListing (numListings : int) -> None:
                 random.randint(1, numCrops),
                 round(random.uniform(1, 30), 2),
                 fake.date_between(start_date="-30d", end_date="today"),
-                random.choice(["Picked this morning", "Harvested yesterday",
-                            "Very fresh", "Good condition", None]),
+                random.choice(
+                    [
+                        "Picked this morning",
+                        "Harvested yesterday",
+                        "Very fresh",
+                        "Good condition",
+                        None,
+                    ]
+                ),
                 random.choice(["available", "claimed", "expired"]),
             ),
         )
     db.commit()
 
-def seedProduceRequests (numRequests : int) -> None:
+
+def seedProduceRequests(numRequests: int) -> None:
     for _ in range(numRequests):
         req_date = fake.date_between(start_date="-20d", end_date="today")
         MySQL.execute(
@@ -276,8 +331,11 @@ def seedProduceRequests (numRequests : int) -> None:
         )
     db.commit()
 
-def seedPickups (numPickups : int) -> None:
-    used_requests = random.sample(range(1, numRequests + 1), k=min(numPickups, numRequests))
+
+def seedPickups(numPickups: int) -> None:
+    used_requests = random.sample(
+        range(1, numRequests + 1), k=min(numPickups, numRequests)
+    )
     for req_id in used_requests:
         MySQL.execute(
             """INSERT INTO Pickup
@@ -293,7 +351,8 @@ def seedPickups (numPickups : int) -> None:
         )
     db.commit()
 
-def seedTasks (numTasks : int) -> None:
+
+def seedTasks(numTasks: int) -> None:
     for _ in range(numTasks):
         MySQL.execute(
             """INSERT INTO Workday_Task
@@ -309,7 +368,8 @@ def seedTasks (numTasks : int) -> None:
         )
     db.commit()
 
-def seedSignUps (numSignUps : int) -> None:
+
+def seedSignUps(numSignUps: int) -> None:
     for _ in range(numSignUps):
         MySQL.execute(
             """INSERT INTO Event_Signup (user_id, workday_id, signup_date, status)
@@ -323,8 +383,17 @@ def seedSignUps (numSignUps : int) -> None:
         )
     db.commit()
 
+
 def seedApplications(numApplications: int) -> None:
-    statuses = ["pending", "pending", "pending", "waitlisted", "waitlisted", "approved", "rejected"]
+    statuses = [
+        "pending",
+        "pending",
+        "pending",
+        "waitlisted",
+        "waitlisted",
+        "approved",
+        "rejected",
+    ]
     for _ in range(numApplications):
         MySQL.execute(
             """INSERT INTO Plot_Application (user_id, plot_id, requested_date, status)
@@ -339,7 +408,7 @@ def seedApplications(numApplications: int) -> None:
     db.commit()
 
 
-def seedLogs (numLogs : int) -> None:
+def seedLogs(numLogs: int) -> None:
     for _ in range(numLogs):
         MySQL.execute(
             """INSERT INTO Volunteer_Log (user_id, task_id, work_date, hours_logged, notes)
@@ -354,17 +423,19 @@ def seedLogs (numLogs : int) -> None:
         )
     db.commit()
 
-def fetchAll (table: str) -> None:
+
+def fetchAll(table: str) -> None:
     MySQL.execute(f"SELECT * FROM {table}")
     rows = MySQL.fetchall()
     print(f"Retrieving data for the table {table}")
     if rows == []:
-        raise ValueError("Empty Value") 
+        raise ValueError("Empty Value")
     else:
         for row in rows:
             print(row)
 
-def retrieveAll () -> None:
+
+def retrieveAll() -> None:
     tables = [
         "Garden_Site",
         "Crop",
@@ -389,7 +460,8 @@ def retrieveAll () -> None:
         print()
         fetchAll(table)
 
-def main ():
+
+def main():
     mysqlConnector()
 
     print(MySQL)
@@ -416,6 +488,7 @@ def main ():
 
     MySQL.close()
     db.close()
+
 
 if __name__ == "__main__":
     main()

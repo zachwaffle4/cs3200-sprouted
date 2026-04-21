@@ -64,7 +64,9 @@ def create_pest_report():
         )
         get_db().commit()
         return (
-            jsonify({"message": "Pest report submitted", "report_id": cursor.lastrowid}),
+            jsonify(
+                {"message": "Pest report submitted", "report_id": cursor.lastrowid}
+            ),
             201,
         )
     except Error as e:

@@ -51,17 +51,9 @@ def get_volunteer_log(volunteer_id):
 
 def log_hours(volunteer_id, payload):
     try:
-        # Map frontend payload to backend expected fields
-        backend_payload = {
-            "work_date": payload.get("date"),
-            "hours_logged": payload.get("hours"),
-            "notes": payload.get("notes"),
-            "task_id": payload.get("task_id")
-        }
-        r = requests.post(f"{API_BASE}/volunteers/{volunteer_id}/log", json=backend_payload)
+        r = requests.post(f"{API_BASE}/volunteers/{volunteer_id}/log", json=payload)
         return r.status_code in (200, 201), r.json() if r.status_code in (200, 201) else {}
-    except Exception as e:
-        logger.error(f"Error logging hours: {e}")
+    except Exception:
         return False, {}
 
 def cancel_signup(signup_id):

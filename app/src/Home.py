@@ -5,7 +5,10 @@
 
 # Set up basic logging infrastructure
 import logging
-logging.basicConfig(format='%(filename)s:%(lineno)s:%(levelname)s -- %(message)s', level=logging.INFO)
+
+logging.basicConfig(
+    format="%(filename)s:%(lineno)s:%(levelname)s -- %(message)s", level=logging.INFO
+)
 logger = logging.getLogger(__name__)
 
 # import the main streamlit library as well
@@ -15,12 +18,12 @@ from modules.nav import SideBarLinks
 
 # streamlit supports regular and wide layout (how the controls
 # are organized/displayed on the screen).
-st.set_page_config(layout='wide')
+st.set_page_config(layout="wide")
 
 # If a user is at this page, we assume they are not
 # authenticated.  So we change the 'authenticated' value
 # in the streamlit session_state to false.
-st.session_state['authenticated'] = False
+st.session_state["authenticated"] = False
 
 # Use the SideBarLinks function from src/modules/nav.py to control
 # the links displayed on the left-side panel.
@@ -33,52 +36,58 @@ SideBarLinks(show_home=True)
 # ***************************************************
 
 logger.info("Loading the Home page of the app")
-st.title('Sprouted')
-st.write('#### A Community Garden Management App.')
-st.write('#### Welcome! As which user would you like to log in?')
+st.title("Sprouted")
+st.write("#### A Community Garden Management App.")
+st.write("#### Welcome! As which user would you like to log in?")
 
 # For each of the user personas for which we are implementing
 # functionality, we put a button on the screen that the user
 # can click to MIMIC logging in as that mock user.
 
-if st.button("Act as Derek Washington, a Garden Administrator",
-             type='primary',
-             use_container_width=True):
+if st.button(
+    "Act as Derek Washington, a Garden Administrator",
+    type="primary",
+    use_container_width=True,
+):
     # when user clicks the button, they are now considered authenticated
-    st.session_state['authenticated'] = True
+    st.session_state["authenticated"] = True
     # we set the role of the current user
-    st.session_state['role'] = 'garden_admin'
+    st.session_state["role"] = "garden_admin"
     # we add the first name of the user (so it can be displayed on
     # subsequent pages).
-    st.session_state['first_name'] = 'Derek'
+    st.session_state["first_name"] = "Derek"
     # finally, we ask streamlit to switch to another page, in this case, the
     # landing page for this particular user type
     logger.info("Logging in as Garden Administrator Persona")
-    st.switch_page('pages/00_Admin_Home.py')
+    st.switch_page("pages/00_Admin_Home.py")
 
-if st.button('Act as Maria Santons, a Plot Owner',
-             type='primary',
-             use_container_width=True):
-    st.session_state['authenticated'] = True
-    st.session_state['role'] = 'plot_owner'
-    st.session_state['first_name'] = 'Maria'
+if st.button(
+    "Act as Maria Santos, a Plot Owner", type="primary", use_container_width=True
+):
+    st.session_state["authenticated"] = True
+    st.session_state["role"] = "plot_owner"
+    st.session_state["first_name"] = "Maria"
     logger.info("Logging in as Plot Owner Persona")
-    st.switch_page('pages/10_Plot_Owner_Home.py') # TODO: create this page
+    st.switch_page("pages/10_Plot_Owner_Home.py")  # TODO: create this page
 
-if st.button('Act as Clark Kent, a Volunteer',
-             type='primary',
-             use_container_width=True):
-    st.session_state['authenticated'] = True
-    st.session_state['role'] = 'volunteer'
-    st.session_state['first_name'] = 'Clark'
+if st.button(
+    "Act as Clark Kent, a Volunteer", type="primary", use_container_width=True
+):
+    st.session_state["authenticated"] = True
+    st.session_state["role"] = "volunteer"
+    st.session_state["first_name"] = "Clark"
     logger.info("Logging in as Volunteer Persona")
-    st.switch_page('pages/40_Clark_Home.py')
+    st.switch_page("pages/40_Clark_Home.py")
 
-if st.button('Act as Lucia Tran, a Food Bank Coordinator',
-             type='primary',
-             use_container_width=True):
-    st.session_state['authenticated'] = True
-    st.session_state['role'] = 'food_bank_coordinator'
-    st.session_state['first_name'] = 'Lucia'
+if st.button(
+    "Act as Lucia Tran, a Food Bank Coordinator",
+    type="primary",
+    use_container_width=True,
+):
+    st.session_state["authenticated"] = True
+    st.session_state["role"] = "food_bank_coordinator"
+    st.session_state["first_name"] = "Lucia"
     logger.info("Logging in as Food Bank Coordinator Persona")
-    st.switch_page('pages/50_Lucia_Dashboard.py') # TODO: change this to the actual page for Food Bank Coordinator
+    st.switch_page(
+        "pages/50_Lucia_Dashboard.py"
+    )  # TODO: change this to the actual page for Food Bank Coordinator

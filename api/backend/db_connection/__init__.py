@@ -24,8 +24,10 @@ def get_db():
             )
         except mysql.connector.Error as err:
             current_app.logger.error(f"Database connection error: {err}")
-            current_app.logger.error(f"Attempted connection to {current_app.config['MYSQL_DATABASE_HOST']} "
-                                    f"as {current_app.config['MYSQL_DATABASE_USER']}")
+            current_app.logger.error(
+                f"Attempted connection to {current_app.config['MYSQL_DATABASE_HOST']} "
+                f"as {current_app.config['MYSQL_DATABASE_USER']}"
+            )
             raise err
     return g.db
 
