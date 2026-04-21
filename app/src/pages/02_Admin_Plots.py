@@ -99,37 +99,9 @@ if "editing_plot" not in st.session_state:
 st.title("Plot Manager")
 st.divider()
 
-# Filter bar — "Active" matches occupancy_status 'assigned', "Vacant" matches 'vacant'
-status_filter = st.radio(
-    "Filter by Status", ["All", "Active", "Vacant"], horizontal=True
-)
-filtered = [
-    p for p in all_plots if status_filter == "All" or p["status"] == status_filter
-]
-st.caption(f"Showing {len(filtered)} of {len(all_plots)} plots")
-
-# Plots table
-st.subheader(f"{status_filter} Plots")
-h1, h2, h3, h4 = st.columns([1, 2, 3, 1])
-h1.write("**Plot**")
-h2.write("**Status**")
-h3.write("**Owner**")
-h4.write("**Edit**")
-
-for plot in filtered:
-    with st.container(border=True):
-        c1, c2, c3, c4 = st.columns([1, 2, 3, 1])
-        c1.write(plot["plot_label"])
-        c2.write(plot["status"])
-        c3.write(plot["owner"])
-        if c4.button("Edit", key=f"edit_{plot['id']}"):
-            st.session_state["editing_plot"] = plot
-            st.rerun()
-
 # Edit form (shown when a plot is selected)
 if st.session_state["editing_plot"] is not None:
     plot = st.session_state["editing_plot"]
-    st.divider()
     st.subheader(f"Editing Plot {plot['plot_label']}")
     st.caption("Enter a User ID to assign, or set to 0 to vacate the plot.")
 
@@ -173,7 +145,7 @@ if st.session_state["editing_plot"] is not None:
             st.session_state["editing_plot"] = None
             st.rerun()
 
-st.divider()
+    st.divider()
 
 # Waitlist queue
 st.subheader("Waitlist Queue")
@@ -197,4 +169,33 @@ for entry in waitlist_queue:
                 st.toast(
                     "Promotion failed. No vacant plot may be available.", icon="⚠️"
                 )
+            st.rerun()
+
+st.divider()
+
+# Filter bar
+status_filter = st.radio(
+    "Filter by Status", ["All", "Active", "Vacant"], horizontal=True
+)
+filtered = [
+    p for p in all_plots if status_filter == "All" or p["status"] == status_filter
+]
+st.caption(f"Showing {len(filtered)} of {len(all_plots)} plots")
+
+# Plots table
+st.subheader(f"{status_filter} Plots")
+h1, h2, h3, h4 = st.columns([1, 2, 3, 1])
+h1.write("**Plot**")
+h2.write("**Status**")
+h3.write("**Owner**")
+h4.write("**Edit**")
+
+for plot in filtered:
+    with st.container(border=True):
+        c1, c2, c3, c4 = st.columns([1, 2, 3, 1])
+        c1.write(plot["plot_label"])
+        c2.write(plot["status"])
+        c3.write(plot["owner"])
+        if c4.button("Edit", key=f"edit_{plot['id']}"):
+            st.session_state["editing_plot"] = plot
             st.rerun()
