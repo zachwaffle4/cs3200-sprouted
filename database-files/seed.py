@@ -66,6 +66,7 @@ task_descriptions = [
 
 numSignUps = 100
 numLogs = 100
+numApplications = 15
 
 def mysqlConnector () -> None: 
     global MySQL
@@ -322,6 +323,22 @@ def seedSignUps (numSignUps : int) -> None:
         )
     db.commit()
 
+def seedApplications(numApplications: int) -> None:
+    statuses = ["pending", "pending", "pending", "waitlisted", "waitlisted", "approved", "rejected"]
+    for _ in range(numApplications):
+        MySQL.execute(
+            """INSERT INTO Plot_Application (user_id, plot_id, requested_date, status)
+            VALUES (%s, %s, %s, %s)""",
+            (
+                random.randint(1, numUser),
+                random.randint(1, numPlots) if random.random() > 0.4 else None,
+                fake.date_between(start_date="-30d", end_date="today"),
+                random.choice(statuses),
+            ),
+        )
+    db.commit()
+
+
 def seedLogs (numLogs : int) -> None:
     for _ in range(numLogs):
         MySQL.execute(
@@ -366,6 +383,7 @@ def retrieveAll () -> None:
         "Workday_Task",
         "Event_Signup",
         "Volunteer_Log",
+        "Plot_Application",
     ]
     for table in tables:
         print()
@@ -392,6 +410,7 @@ def main ():
     seedTasks(numTasks)
     seedSignUps(numSignUps)
     seedLogs(numLogs)
+    seedApplications(numApplications)
 
     printing_database = input("Type Yes to print database ").lower()
     if printing_database == 'yes':
