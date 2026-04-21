@@ -36,7 +36,31 @@ def admin_workdays_nav():
 
 
 # ---- Role: plot_owner -----------------------------------------------------
-# TODO: add plot owner links here + update method names
+
+def plot_owner_home_nav():
+    st.sidebar.page_link(
+        "pages/10_Plot_Owner_Home.py", label="Plot Owner Home", icon="🏠"
+    )
+
+def maria_my_plot_nav():
+    st.sidebar.page_link(
+        "pages/11_Maria_My_Plot.py", label="My Plot", icon="🌿"
+    )
+
+def maria_log_activity_nav():
+    st.sidebar.page_link(
+        "pages/12_Maria_Log_Activity.py", label="Log Activity", icon="📝"
+    )
+
+def maria_report_pest_nav():
+    st.sidebar.page_link(
+        "pages/13_Maria_Report_Pest.py", label="Report Pest", icon="🐛"
+    )
+
+def maria_list_surplus_nav():
+    st.sidebar.page_link(
+        "pages/14_Maria_List_Surplus.py", label="List Surplus", icon="🥕"
+    )
 
 
 # ---- Role: volunteer ----------------------------------------------------
@@ -103,7 +127,11 @@ def SideBarLinks(show_home=False):
             admin_workdays_nav()
 
         if st.session_state["role"] == "plot_owner":
-            pass  # TODO: add plot owner nav calls here
+            plot_owner_home_nav()
+            maria_my_plot_nav()
+            maria_log_activity_nav()
+            maria_report_pest_nav()
+            maria_list_surplus_nav()
 
         if st.session_state["role"] == "volunteer":
             volunteer_home_nav()
